@@ -136,7 +136,7 @@ main_UDP:
 
 main_rotate:
 sub_rotate:
-	li      $t0, 4                              # Angle we want to rotate, can be tweaked to help get out of some spots
+	li      $t0, 3                              # Angle we want to rotate, can be tweaked to help get out of some spots
 	sw      $t0, ANGLE
 	sw      $zero, ANGLE_CONTROL
 
