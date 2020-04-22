@@ -106,20 +106,15 @@ main_scan:
 
     lbu     $t2, 2($t2)                         # Loads the identifying byte from the scanner, can be found in docs
 
-    li      $t3, 2
-    beq     $t2, $t3, main_UDP                  # If host, prep to fire UDP
+    beq     $t2, 2, main_UDP			# If host, prep to fire UDP
 
-    li      $t3, 8
-    beq     $t2, $t3, main_UDP                  # If enemy, prep to fire UDP
+    beq     $t2, 8, main_UDP			# If enemy, prep to fire UDP
 
-    li      $t3, 16
-    beq     $t2, $t3, main_UDP                  # If opponent, prep to fire UDP
+    beq     $t2, 16, main_UDP			# If opponent, prep to fire UDP
 
-    li      $t3, 1
-    beq     $t2, $t3, main_rotate               # If wall, rotate
+    beq     $t2, 1, main_rotate			# If wall, rotate
 
-    li      $t3, 4
-    beq     $t2, $t3, main_rotate               # If friendly host, rotate
+    beq     $t2, 4, main_rotate			# If friendly host, rotate
 
     j       main_loop
 
