@@ -143,8 +143,6 @@ sub_rotate:
 	la      $t2, scanner_wb
 	sw      $t2, USE_SCANNER
 
-	lbu     $t2, 0($t2)                         # Loads hit_x
-	lbu     $t2, 1($t2)                         # Loads hit_y
 	lb      $t2, 2($t2)                         # Loads tile_type
 
 	beq     $t2, 1, sub_rotate
