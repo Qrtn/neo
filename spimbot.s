@@ -119,9 +119,7 @@ main_scan:
 
 	beq     $t2, 10, main_UDP_2			# If enemy host, prep to fire 2 UDP
 
-	beq     $t2, 8, main_UDP			# If enemy, prep to fire UDP
-
-	beq     $t2, 16, main_UDP			# If opponent, prep to fire UDP
+	beq     $t2, 24, main_UDP			# If enemy player, prep to fire UDP
 
 	beq     $t2, 1, main_rotate			# If wall, rotate
 
