@@ -34,6 +34,9 @@ REQUEST_PUZZLE_ACK      = 0xffff00d8  ## Puzzle
 RESPAWN_INT_MASK        = 0x2000      ## Respawn
 RESPAWN_ACK             = 0xffff00f0  ## Respawn
 
+# our constants
+DEFAULT_VELOCITY	= 10
+
 .data
 ### Puzzle
 puzzle:     .byte 0:268
@@ -147,7 +150,7 @@ sub_rotate:
 
 	beq     $t2, 1, sub_rotate
 
-	li      $t0, 5
+	li      $t0, DEFAULT_VELOCITY
 	sw      $t0, VELOCITY
 
 	j       main_loop
@@ -777,7 +780,7 @@ request_puzzle_interrupt:
 respawn_interrupt:
 	sw      $0, RESPAWN_ACK
 
-	li      $t0, 5
+	li      $t0, DEFAULT_VELOCITY
 	sw      $t0, VELOCITY($zero)
 
 	j       interrupt_dispatch
