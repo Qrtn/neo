@@ -106,7 +106,9 @@ main_scan:
 
     lbu     $t2, 2($t2)                         # Loads the identifying byte from the scanner, can be found in docs
 
-    beq     $t2, 2, main_UDP			# If host, prep to fire UDP
+    beq     $t2, 2, main_UDP			# If neutral host, prep to fire UDP
+
+    beq     $t2, 10, main_UDP_2			# If enemy host, prep to fire 2 UDP
 
     beq     $t2, 8, main_UDP			# If enemy, prep to fire UDP
 
@@ -117,6 +119,9 @@ main_scan:
     beq     $t2, 4, main_rotate			# If friendly host, rotate
 
     j       main_loop
+
+main_UDP_2:					# Shoot 2 UDP
+    sw      $zero, SHOOT_UDP_PACKET
 
 main_UDP:
     sw      $zero, SHOOT_UDP_PACKET
