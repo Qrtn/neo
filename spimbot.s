@@ -70,6 +70,7 @@ main:
     li      $t4, 7
 
 main_loop:
+
     rem     $t5, $t1, $t4                       # The idea here is that we want to limit the times we check_bytecoin and hence scan to happen 1/7 times 
     sub     $t1, $t1, 1
     beq     $t5, $zero, check_bytecoin
@@ -121,7 +122,7 @@ main_scan:
 
     beq     $t2, 1, main_rotate			# If wall, rotate
 
-    beq     $t2, 4, main_rotate			# If friendly host, rotate
+    #beq     $t2, 4, main_rotate			# If friendly host, rotate
 
     j       main_loop
 
@@ -134,11 +135,21 @@ main_UDP:
     j       main_loop                           # Restarts loop
 
 main_rotate:
-    li      $t0, 8                              # Angle we want to rotate, can be tweaked to help get out of some spots
+sub_rotate:
+    li      $t0, 4                              # Angle we want to rotate, can be tweaked to help get out of some spots
     sw      $t0, ANGLE
     sw      $zero, ANGLE_CONTROL
+
+    la      $t2, scanner_wb
+    sw      $t2, USE_SCANNER
+
+    lbu     $t2, 2($t2)                         # Loads the identifying byte from the scanner, can be found in docs
+
+    beq     $t2, 1, sub_rotate
+
     li      $t0, 5
     sw      $t0, VELOCITY
+
     j       main_loop
 
 main_finish:
