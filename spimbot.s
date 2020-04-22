@@ -138,6 +138,9 @@ main_UDP:
 	j       main_loop                           # Restarts loop
 
 main_rotate:
+	li      $t0, 5                              # Slow velocity
+	sw      $t0, VELOCITY
+
 sub_rotate:
 	li      $t0, 3                              # Angle we want to rotate, can be tweaked to help get out of some spots
 	sw      $t0, ANGLE
@@ -151,7 +154,7 @@ sub_rotate:
 	beq     $t2, 1, sub_rotate
 
 	li      $t0, DEFAULT_VELOCITY
-	sw      $t0, VELOCITY
+	sw      $t0, VELOCITY				# Restore velocity
 
 	j       main_loop
 
