@@ -58,8 +58,13 @@ main:
     mtc0    $t4, $12
     
     #Fill in your code here
-    li      $t0, 5                          
-    sw      $t0, VELOCITY($zero)
+    li      $t0, 1                          
+    sw      $t0, VELOCITY
+
+    li      $t0, 45
+    sw      $t0, ANGLE				# Set initial angle to southeast
+    li      $t0, 1
+    sw      $t0, ANGLE_CONTROL			# absolute
 
     li      $t1, 500
     li      $t4, 7
@@ -133,7 +138,7 @@ main_rotate:
     sw      $t0, ANGLE
     sw      $zero, ANGLE_CONTROL
     li      $t0, 5
-    sw      $t0, VELOCITY($zero)
+    sw      $t0, VELOCITY
     j       main_loop
 
 main_finish:
