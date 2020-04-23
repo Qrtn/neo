@@ -38,30 +38,48 @@ RESPAWN_ACK             = 0xffff00f0  ## Respawn
 ### Puzzle
 puzzle:     .byte 0:268
 solution:   .byte 0:256
-#### Puzzle
-
 has_puzzle: .word 0
 
-flashlight_space: .word 0
-
+#############
+# Main code #
+#############
 .text
 main:
-    # Construct interrupt mask
+	# Construct interrupt mask
 	li      $t4, 0
-	or      $t4, $t4, BONK_INT_MASK # request bonk
-	or      $t4, $t4, REQUEST_PUZZLE_INT_MASK           # puzzle interrupt bit
-	or      $t4, $t4, 1 # global enable
+	or      $t4, $t4, REQUEST_PUZZLE_INT_MASK	# puzzle interrupt bit
+	or      $t4, $t4, RESPAWN_INT_MASK		# respawn interrupt bit
+	or      $t4, $t4, 1				# global enable
 	mtc0    $t4, $12
 
-    #Fill in your code here
+	la      $s0, puzzle
+
+request_puzzle:
+	sw      $s0, REQUEST_PUZZLE
+
+check_puzzle_available:
+	lw      $t0, has_puzzle
+	beq     $t0, $zero, check_puzzle_available
+
+	la      $a0, puzzle				# load arguments
+	la      $a1, solution
+	li      $a2, 0
+	li      $a3, 0
+
+	jal	solve					# call solver
+
+	la	$t0, solution				# submit solution
+	sw	$t0, SUBMIT_SOLUTION
+
+	sw	$zero, has_puzzle			# reset has_puzzle
+
+	j	request_puzzle
+
 	jr      $ra
-
-
 
 ###############
 # Kernel code #
 ###############
-
 .kdata
 chunkIH:    .space 40
 non_intrpt_str:    .asciiz "Non-interrupt exception\n"
@@ -131,6 +149,12 @@ timer_interrupt:
 request_puzzle_interrupt:
 	sw      $0, REQUEST_PUZZLE_ACK
     #Fill in your puzzle interrupt code here
+
+	# Write true to M[has_puzzle]
+	la	$t0, has_puzzle
+	li	$t1, 1
+	sw	$t1, ($t0)
+
 	j       interrupt_dispatch
 
 respawn_interrupt:
