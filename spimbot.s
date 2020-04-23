@@ -73,7 +73,7 @@ main:
 
 main_loop:
 
-	rem     $t5, $t1, 12                       # The idea here is that we want to limit the times we check_bytecoin and hence scan to happen 1/7 times 
+	rem     $t5, $t1, 4			# The idea here is that we want to limit the times we check_bytecoin and hence scan to happen 1/7 times 
 	sub     $t1, $t1, 1
 	beq     $t5, $zero, check_bytecoin
 	j       main_loop
@@ -151,7 +151,7 @@ main_rotate:
 	sw      $t0, VELOCITY
 
 sub_rotate:
-	li      $t0, 2                              # Angle we want to rotate, can be tweaked to help get out of some spots
+	li      $t0, 3                              # Angle we want to rotate, can be tweaked to help get out of some spots
 	sw      $t0, ANGLE
 	sw      $zero, ANGLE_CONTROL
 
