@@ -6,4 +6,4 @@
 
 - Geometric perfection
 - Excellence in multitasking
-- Drive to win
+- Extrasensory perception
