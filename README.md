@@ -6,4 +6,5 @@
 
 - Geometric perfection
 - Excellence in multitasking
+- Instruction set virtualization
 - Extrasensory perception
