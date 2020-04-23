@@ -48,7 +48,7 @@ RESPAWN_ACK             = 0xffff00f0  ## Respawn
 # 100000000 + c	Delay c cycles
 
 movement:
-.word 45 1510 100961665 1500 22 1510 100564623 1500
+.word 45 1510 100096166 1500 66 1510 100132619 1500 90000
 
 current_move:
 .word 0

@@ -57,7 +57,7 @@ class Compiler:
 
     @staticmethod
     def go(pixels):
-        time = pixels / (Compiler.DEFAULT_VELOCITY / 100000)
+        time = pixels / (Compiler.DEFAULT_VELOCITY / 10000)
         return Compiler.velocity(Compiler.DEFAULT_VELOCITY) + \
             Compiler.delay(time) + Compiler.velocity(0)
 
@@ -65,11 +65,19 @@ class Compiler:
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def angleTo(self, x, y):
-        return math.degrees(math.atan2(y - self.y, x - self.x))
+        # y coordinate must be negative due to layout of coordinates on screen
+        dy = -(y - self.y)
+        dx = x - self.x
+
+        # angle is flipped according to spimbot angle I/O
+        angle = -math.atan2(dy, dx)
+
+        return math.degrees(angle)
 
     def goto(self, x, y):
         angle = self.angleTo(x, y)
-        cmd = self.angle(angle) + self.go(self.distTo(x, y))
+        dist = self.distTo(x, y)
+        cmd = self.angle(angle) + self.go(dist)
         self.x = x
         self.y = y
         return cmd
@@ -83,6 +91,11 @@ class Lexer:
         words = []
 
         for line in stream:
+            line = line.strip()
+
+            if line.startswith('#'):
+                continue
+
             command, *args = line.split()
             words.extend(self.compiler.parse(command, args))
 
