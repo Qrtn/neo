@@ -128,11 +128,24 @@ main_scan:
 	j       main_loop
 
 main_UDP_2:					# Shoot 2 UDP
+	li      $t0, 3                              # Slow velocity while shooting
+	sw      $t0, VELOCITY
+
 	sw      $zero, SHOOT_UDP_PACKET
+	sw      $zero, SHOOT_UDP_PACKET
+
+	li      $t0, DEFAULT_VELOCITY			# Restore velocity
+	sw      $t0, VELOCITY
+	j       main_loop                           # Restarts loop
 
 main_UDP:
+	li      $t0, 3                              # Slow velocity while shooting
+	sw      $t0, VELOCITY
+
 	sw      $zero, SHOOT_UDP_PACKET
 
+	li      $t0, DEFAULT_VELOCITY			# Restore velocity
+	sw      $t0, VELOCITY
 	j       main_loop                           # Restarts loop
 
 main_rotate:
