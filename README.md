@@ -5,7 +5,8 @@
 ### *A new era of SPIMbot*
 
 - Geometric perfection
+- Economic efficiency
+- Spatial awareness
 - Excellence in multitasking
 - Instruction set virtualization
 - Source code generation
-- Extrasensory perception
