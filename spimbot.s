@@ -128,7 +128,7 @@ main_scan:
 	j       main_loop
 
 main_UDP_2:					# Shoot 2 UDP
-	li      $t0, 3                              # Slow velocity while shooting
+	li      $t0, 0                              # Slow velocity while shooting
 	sw      $t0, VELOCITY
 
 	sw      $zero, SHOOT_UDP_PACKET
@@ -139,7 +139,7 @@ main_UDP_2:					# Shoot 2 UDP
 	j       main_loop                           # Restarts loop
 
 main_UDP:
-	li      $t0, 3                              # Slow velocity while shooting
+	li      $t0, 0                              # Slow velocity while shooting
 	sw      $t0, VELOCITY
 
 	sw      $zero, SHOOT_UDP_PACKET
