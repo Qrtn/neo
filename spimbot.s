@@ -179,6 +179,19 @@ execute_until_delay:
 
 	add	$t0, $t0, 4
 
+	li      $v0, PRINT_INT
+	lw      $a0, BOT_X
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, ','
+	syscall
+	li      $v0, PRINT_INT
+	lw      $a0, BOT_Y
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, '\n'
+	syscall
+
 	blt	$t1, 1000, execute_angle
 	blt	$t1, 2000, execute_velocity
 	beq	$t1, 2000, execute_udp
