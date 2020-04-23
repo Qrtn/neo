@@ -65,10 +65,11 @@ class Compiler:
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def angleTo(self, x, y):
-        return math.atan2(y - self.y, x - self.x)
+        return math.degrees(math.atan2(y - self.y, x - self.x))
 
     def goto(self, x, y):
-        cmd = self.angle(self.angleTo(x, y)) + self.go(self.distTo(x, y))
+        angle = self.angleTo(x, y)
+        cmd = self.angle(angle) + self.go(self.distTo(x, y))
         self.x = x
         self.y = y
         return cmd

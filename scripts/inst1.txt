@@ -1,1 +1,3 @@
-goto 
+goto 68 68
+goto 120 90
+end
