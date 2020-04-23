@@ -24,11 +24,13 @@ class Compiler:
             'jump': self.jump,
             'delay': self.delay,
             'go': self.go,
-            'goto': self.goto
+            'goto': self.goto,
+            'shoot': self.shoot,
+            'shootpos': self.shootpos
         }
 
-        self.x = 0
-        self.y = 0
+        self.x = 4
+        self.y = 4
 
     def parse(self, command, args):
         int_args = [int(arg) for arg in args]
@@ -80,6 +82,15 @@ class Compiler:
         cmd = self.angle(angle) + self.go(dist)
         self.x = x
         self.y = y
+        return cmd
+
+    @staticmethod
+    def shoot():
+        return [2000]
+
+    def shootpos(self, x, y):
+        angle = self.angleTo(x, y)
+        cmd = self.angle(angle) + self.shoot()
         return cmd
 
 
