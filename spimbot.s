@@ -160,25 +160,26 @@ sub_rotate:
 	la      $t2, scanner_wb
 	sw      $t2, USE_SCANNER
 
-	lbu     $s0, 0($t2)                         # Loads hit_x
-	lbu     $s1, 1($t2)                         # Loads hit_y
 	lb      $s2, 2($t2)                         # Loads tile_type
 
+	lbu     $s0, 0($t2)                         # Loads hit_x
+	lbu     $s1, 1($t2)                         # Loads hit_y
+	
 	lw	$s3, BOT_X				# distance check for hit tile
 	lw	$s4, BOT_Y
-
+	
 	srl	$s3, $s3, 3				# divide by 8 to get tiles
 	srl	$s4, $s4, 3				# divide by 8
-
+	
 	sub	$s3, $s3, $s0				# BOT_X -= hit_x
 	sub	$s4, $s4, $s1				# BOT_Y -= hit_y
-
+	
 	mul	$s3, $s3, $s3				# (BOT_X - hit_x)^2
 	mul	$s4, $s4, $s4				# (BOT_Y - hit_y)^2
-
+	
 	add	$s3, $s3, $s4				# dist squared
-
-	bge	$s3, 25, end_rotate			# rotate if more than 5 tiles away
+	
+	#bgt	$s3, 64, end_rotate			# dont rotate if more than 5 tiles away
 
 	beq     $s2, 1, sub_rotate
 
