@@ -80,8 +80,17 @@ class Compiler:
         angle = self.angleTo(x, y)
         dist = self.distTo(x, y)
         cmd = self.angle(angle) + self.go(dist)
-        self.x = x
-        self.y = y
+
+        actualDist = int(dist)
+        actualAngle = math.radians(-int(angle))
+
+        dx = actualDist * math.cos(actualAngle)
+        # Flip dy again due to coordinate system
+        dy = -actualDist * math.sin(actualAngle)
+
+        self.x = self.x + dx
+        self.y = self.y + dy
+
         return cmd
 
     @staticmethod

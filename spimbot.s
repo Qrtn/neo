@@ -35,6 +35,7 @@ RESPAWN_INT_MASK        = 0x2000      ## Respawn
 RESPAWN_ACK             = 0xffff00f0  ## Respawn
 
 # our constants
+DEBUG = 0
 
 .data
 ### Movement Pattern
@@ -48,7 +49,7 @@ RESPAWN_ACK             = 0xffff00f0  ## Respawn
 # 100000000 + c	Delay c cycles
 
 movement:
-.word 45 1510 100090509 1500 -135 2000 127 2000 -37 2000 66 1510 100132619 1500 -94 2000 11 2000 145 1510 100069065 1500 -180 1510 100006000 1500 -156 2000 102 2000 53 2000 -10 2000 0 1510 100006000 1500 -34 1510 100069065 1500 24 1510 100143178 1500 45 2000 -54 2000 141 2000 -114 1510 100140527 1500 -57 1510 100072401 1500 90000
+.word 45 1510 100090509 1500 -135 2000 127 2000 -37 2000 66 1510 100133092 1500 -95 2000 12 2000 149 1510 100077732 1500 -155 2000 100 2000 1 1510 100007269 1500 56 2000 -11 2000 -34 1510 100069241 1500 24 1510 100143095 1500 50 2000 -53 2000 140 2000 -115 1510 100142966 1500 -55 1510 100071367 1500 -113 2000 107 2000 35 2000 -82 1510 100005689 1500 -11 2000 105 1510 100007570 1500 125 1510 100071571 1500 101000000 99996 90000
 
 current_move:
 .word 0
@@ -179,19 +180,23 @@ execute_until_delay:
 
 	add	$t0, $t0, 4
 
-	#	li      $v0, PRINT_INT
-	#	lw      $a0, BOT_X
-	#	syscall
-	#	li	$v0, PRINT_CHAR
-	#	li	$a0, ','
-	#	syscall
-	#	li      $v0, PRINT_INT
-	#	lw      $a0, BOT_Y
-	#	syscall
-	#	li	$v0, PRINT_CHAR
-	#	li	$a0, '\n'
-	#	syscall
+	li	$t9, DEBUG
+	beq	$t9, $zero, no_debug
 
+	li      $v0, PRINT_INT
+	lw      $a0, BOT_X
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, ','
+	syscall
+	li      $v0, PRINT_INT
+	lw      $a0, BOT_Y
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, '\n'
+	syscall
+
+no_debug:
 	blt	$t1, 1000, execute_angle
 	blt	$t1, 2000, execute_velocity
 	beq	$t1, 2000, execute_udp
