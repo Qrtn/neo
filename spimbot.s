@@ -70,19 +70,17 @@ main:
 	sw      $t0, ANGLE_CONTROL			# absolute
 
 	li      $t1, 500
-	li      $t4, 7
 
 main_loop:
 
-	rem     $t5, $t1, $t4                       # The idea here is that we want to limit the times we check_bytecoin and hence scan to happen 1/7 times 
+	rem     $t5, $t1, 12                       # The idea here is that we want to limit the times we check_bytecoin and hence scan to happen 1/7 times 
 	sub     $t1, $t1, 1
 	beq     $t5, $zero, check_bytecoin
 	j       main_loop
 
 check_bytecoin:
 	lw      $t0, GET_BYTECOINS                  # Anytime we have less than 300 bytecoins, we'll solve puzzles
-	li      $t1, 300
-	blt     $t0, $t1, prep_puzzle
+	blt     $t0, 300, prep_puzzle
 	j       main_scan
 
 prep_puzzle:
@@ -153,7 +151,7 @@ main_rotate:
 	sw      $t0, VELOCITY
 
 sub_rotate:
-	li      $t0, 3                              # Angle we want to rotate, can be tweaked to help get out of some spots
+	li      $t0, 2                              # Angle we want to rotate, can be tweaked to help get out of some spots
 	sw      $t0, ANGLE
 	sw      $zero, ANGLE_CONTROL
 
@@ -162,23 +160,23 @@ sub_rotate:
 
 	lb      $s2, 2($t2)                         # Loads tile_type
 
-	lbu     $s0, 0($t2)                         # Loads hit_x
-	lbu     $s1, 1($t2)                         # Loads hit_y
-	
-	lw	$s3, BOT_X				# distance check for hit tile
-	lw	$s4, BOT_Y
-	
-	srl	$s3, $s3, 3				# divide by 8 to get tiles
-	srl	$s4, $s4, 3				# divide by 8
-	
-	sub	$s3, $s3, $s0				# BOT_X -= hit_x
-	sub	$s4, $s4, $s1				# BOT_Y -= hit_y
-	
-	mul	$s3, $s3, $s3				# (BOT_X - hit_x)^2
-	mul	$s4, $s4, $s4				# (BOT_Y - hit_y)^2
-	
-	add	$s3, $s3, $s4				# dist squared
-	
+	#lbu     $s0, 0($t2)                         # Loads hit_x
+	#lbu     $s1, 1($t2)                         # Loads hit_y
+	#
+	#lw	$s3, BOT_X				# distance check for hit tile
+	#lw	$s4, BOT_Y
+	#
+	#srl	$s3, $s3, 3				# divide by 8 to get tiles
+	#srl	$s4, $s4, 3				# divide by 8
+	#
+	#sub	$s3, $s3, $s0				# BOT_X -= hit_x
+	#sub	$s4, $s4, $s1				# BOT_Y -= hit_y
+	#
+	#mul	$s3, $s3, $s3				# (BOT_X - hit_x)^2
+	#mul	$s4, $s4, $s4				# (BOT_Y - hit_y)^2
+	#
+	#add	$s3, $s3, $s4				# dist squared
+	#
 	#bgt	$s3, 64, end_rotate			# dont rotate if more than 5 tiles away
 
 	beq     $s2, 1, sub_rotate
