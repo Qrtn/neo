@@ -4,8 +4,20 @@ shootpos 60 60
 shootpos 40 104
 shootpos 104 40
 goto 120 190
+shootpos 115 119
+shootpos 200 206
 goto 63 229
+goto 57 229
 shootpos 23 214
-shootpos 48 265
-shootpos 111 296
+shootpos 49 264
+shootpos 107 297
+shootpos 96 222
+goto 63 229
+goto 120 190
+goto 250 250
+shootpos 260 260
+shootpos 279 210
+shootpos 215 278
+goto 192 122
+goto 231 61
 end

@@ -48,7 +48,7 @@ RESPAWN_ACK             = 0xffff00f0  ## Respawn
 # 100000000 + c	Delay c cycles
 
 movement:
-.word 45 1510 100090509 1500 -135 2000 127 2000 -37 2000 66 1510 100132619 1500 145 1510 100069065 1500 -159 2000 112 2000 54 2000 90000
+.word 45 1510 100090509 1500 -135 2000 127 2000 -37 2000 66 1510 100132619 1500 -94 2000 11 2000 145 1510 100069065 1500 -180 1510 100006000 1500 -156 2000 102 2000 53 2000 -10 2000 0 1510 100006000 1500 -34 1510 100069065 1500 24 1510 100143178 1500 45 2000 -54 2000 141 2000 -114 1510 100140527 1500 -57 1510 100072401 1500 90000
 
 current_move:
 .word 0
@@ -139,11 +139,11 @@ interrupt_dispatch:                 # Interrupt:
 	mfc0    $k0, $13                # Get Cause register, again
 	beq     $k0, 0, done            # handled all outstanding interrupts
 
-	and     $a0, $k0, BONK_INT_MASK     # is there a bonk interrupt?
-	bne     $a0, 0, bonk_interrupt
-
 	and     $a0, $k0, TIMER_INT_MASK    # is there a timer interrupt?
 	bne     $a0, 0, timer_interrupt
+
+	and     $a0, $k0, BONK_INT_MASK     # is there a bonk interrupt?
+	bne     $a0, 0, bonk_interrupt
 
 	and     $a0, $k0, REQUEST_PUZZLE_INT_MASK
 	bne     $a0, 0, request_puzzle_interrupt
@@ -179,18 +179,18 @@ execute_until_delay:
 
 	add	$t0, $t0, 4
 
-	li      $v0, PRINT_INT
-	lw      $a0, BOT_X
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li      $v0, PRINT_INT
-	lw      $a0, BOT_Y
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, '\n'
-	syscall
+	#	li      $v0, PRINT_INT
+	#	lw      $a0, BOT_X
+	#	syscall
+	#	li	$v0, PRINT_CHAR
+	#	li	$a0, ','
+	#	syscall
+	#	li      $v0, PRINT_INT
+	#	lw      $a0, BOT_Y
+	#	syscall
+	#	li	$v0, PRINT_CHAR
+	#	li	$a0, '\n'
+	#	syscall
 
 	blt	$t1, 1000, execute_angle
 	blt	$t1, 2000, execute_velocity
