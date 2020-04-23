@@ -5,12 +5,13 @@ shootpos 104 40
 goto 120 190
 shootpos 115 119
 shootpos 200 206
+goto 75 229
+shootpos 107 297
+shootpos 96 222
 goto 55 229
 shootpos 23 214
 shootpos 49 264
-goto 63 229
-shootpos 107 297
-shootpos 96 222
+goto 75 229
 goto 120 190
 goto 250 250
 shootpos 260 260
@@ -25,6 +26,6 @@ goto 232 56
 shootpos 264 50
 goto 230 64
 goto 189 122
-delay 1000000
-jump 0
+goto 68 68
+jump 5
 end
