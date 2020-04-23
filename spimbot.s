@@ -43,11 +43,12 @@ RESPAWN_ACK             = 0xffff00f0  ## Respawn
 # 2000		UDP, may be contingent on previous check of arena map
 # 3000 + x	Check arena map, x
 # 3000 + y	Check arena map, y
+# 90000		End program
 # 100000 + cm	Set current_move to cm
 # 100000000 + c	Delay c cycles
 
 movement:
-.word	45, 1510, 101000000, 225, 1510, 101000000, 100000
+.word	45, 1510, 100090000, 1500, 225, 2000, 90000, 225, 1510, 100200000, 100000
 
 current_move:
 .word 0
@@ -180,7 +181,8 @@ execute_until_delay:
 
 	blt	$t1, 1000, execute_angle
 	blt	$t1, 2000, execute_velocity
-	blt	$t1, 3000, execute_udp
+	beq	$t1, 2000, execute_udp
+	beq	$t1, 90000, return_end
 	blt	$t1, 100000000, execute_jump
 	j	return_delay
 
@@ -204,13 +206,13 @@ execute_jump:
 	j	execute_until_delay
 
 return_delay:
-	sw	$t0, current_move
-
 	sub	$t1, $t1, 100000000
 	lw	$t2, TIMER
 	add	$t2, $t2, $t1
 	sw	$t2, TIMER
 
+return_end:
+	sw	$t0, current_move
 	j       interrupt_dispatch     # see if other interrupts are waiting
 
 request_puzzle_interrupt:
