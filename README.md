@@ -9,8 +9,8 @@
 ### *A new era of SPIMbot*
 
 - Geometric perfection
-- Economic efficiency
 - Spatial awareness
+- Economic efficiency
 - Excellence in multitasking
 - Instruction set virtualization
 - Source code generation
