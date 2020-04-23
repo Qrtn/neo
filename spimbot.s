@@ -34,7 +34,25 @@ REQUEST_PUZZLE_ACK      = 0xffff00d8  ## Puzzle
 RESPAWN_INT_MASK        = 0x2000      ## Respawn
 RESPAWN_ACK             = 0xffff00f0  ## Respawn
 
+# our constants
+END_MOVEMENT		= 12
+RETURN_TO_MOVEMENT	= 0
+
 .data
+### Movement Pattern
+# -360 to 360	absolute angle
+# 1500 +- v	velocity
+# 2000		UDP, may be contingent on previous check of arena map
+# 3000 + x	Check arena map, x
+# 3000 + y	Check arena map, y
+# 100000000 + c	Delay c cycles
+
+movement:
+.word 45, 1510, 110000000
+
+current_move:
+.word 0
+
 ### Puzzle
 puzzle:     .byte 0:268
 solution:   .byte 0:256
@@ -49,8 +67,12 @@ main:
 	li      $t4, 0
 	or      $t4, $t4, REQUEST_PUZZLE_INT_MASK	# puzzle interrupt bit
 	or      $t4, $t4, RESPAWN_INT_MASK		# respawn interrupt bit
+	or      $t4, $t4, TIMER_INT_MASK		# timer interrupt bit
 	or      $t4, $t4, 1				# global enable
 	mtc0    $t4, $12
+
+	li	$t0, 1000
+	sw	$t0, TIMER
 
 	la      $s0, puzzle
 
@@ -113,8 +135,6 @@ interrupt_handler:
 	and     $a0, $a0, 0xf           # ExcCode field
 	bne     $a0, 0, non_intrpt
 
-
-
 interrupt_dispatch:                 # Interrupt:
 	mfc0    $k0, $13                # Get Cause register, again
 	beq     $k0, 0, done            # handled all outstanding interrupts
@@ -141,10 +161,55 @@ bonk_interrupt:
     #Fill in your bonk handler code here
 	j       interrupt_dispatch      # see if other interrupts are waiting
 
+### Movement Pattern
+# -360 to 360	absolute angle
+# 1500 +- v	velocity
+# 2000		UDP, may be contingent on previous check of arena map
+# 3000 + x	Check arena map, x
+# 3000 + y	Check arena map, y
+# 100000000 + c	Delay c cycles
+
 timer_interrupt:
-	sw      $0, TIMER_ACK
-    #Fill in your timer interrupt code here
-	j        interrupt_dispatch     # see if other interrupts are waiting
+	sw      $zero, TIMER_ACK
+
+	lw	$t0, current_move
+
+execute_until_delay:
+	blt	$t0, END_MOVEMENT, execute_parse
+	li	$t0, RETURN_TO_MOVEMENT
+
+execute_parse:
+	lw	$t1, movement($t0)
+
+	add	$t0, $t0, 4
+
+	blt	$t1, 1000, execute_angle
+	blt	$t1, 2000, execute_velocity
+	blt	$t1, 3000, execute_udp
+	j	return_delay
+
+execute_angle:
+	sw	$t1, ANGLE
+	li	$t2, 1
+	sw	$t2, ANGLE_CONTROL
+	j	execute_until_delay
+
+execute_velocity:
+	sub	$t2, $t1, 1500
+	sw	$t2, VELOCITY
+	j	execute_until_delay
+
+execute_udp:
+	sw	$zero, SHOOT_UDP_PACKET
+	j	execute_until_delay
+
+return_delay:
+	sw	$t0, current_move
+
+	sub	$t2, $t1, 100000000
+	sw	$t2, TIMER
+
+	j       interrupt_dispatch     # see if other interrupts are waiting
 
 request_puzzle_interrupt:
 	sw      $0, REQUEST_PUZZLE_ACK
