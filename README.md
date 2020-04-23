@@ -7,4 +7,5 @@
 - Geometric perfection
 - Excellence in multitasking
 - Instruction set virtualization
+- Source code generation
 - Extrasensory perception
