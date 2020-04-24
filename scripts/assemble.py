@@ -132,18 +132,22 @@ class Compiler:
 
 class Lexer:
     HOST_INDEX_TO_TILE_COORDS = {
+	# Top-left
         0:  [7, 7],
         1:  [5, 13],
         2:  [13, 5],
         3:  [14, 14],
+	# Bottom-left
         4:  [2, 26],
         5:  [6, 33],
         6:  [12, 27],
         7:  [13, 37],
+	# Top-right
         8:  [26, 2],
         9:  [27, 12],
         10: [33, 6],
         11: [37, 13],
+	# Bottom-right
         12: [25, 25],
         13: [26, 34],
         14: [34, 26],
