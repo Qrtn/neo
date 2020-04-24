@@ -25,6 +25,9 @@ if __name__ == '__main__':
     filename = sys.argv[1]
     search_text = 'movement:'
 
-    new_text = sys.stdin.read() + '\n'
+    new_text = sys.stdin.read()
+
+    if not new_text:
+        new_text = '\n'
 
     replace_in_file(filename, search_text, new_text)
