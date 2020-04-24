@@ -131,6 +131,25 @@ class Compiler:
 
 
 class Lexer:
+    HOST_INDEX_TO_TILE_COORDS = {
+        0:  [7, 7],
+        1:  [5, 13],
+        2:  [13, 5],
+        3:  [14, 14],
+        4:  [2, 26],
+        5:  [6, 33],
+        6:  [12, 27],
+        7:  [13, 37],
+        8:  [26, 2],
+        9:  [27, 12],
+        10: [33, 6],
+        11: [37, 13],
+        12: [25, 25],
+        13: [26, 34],
+        14: [34, 26],
+        15: [32, 32],
+    }
+
     def __init__(self, compiler=Compiler):
         self.compiler = compiler()
 
@@ -176,9 +195,15 @@ class Lexer:
         return new_lines * times
 
     def preprocess(self, lines):
+        lines = [i.strip() for i in lines]
+
         new_lines = []
 
         for line in lines:
+            if not line or line.startswith('#'):
+                # Comment or whitespace
+                continue
+
             if line.startswith('!!'):
                 # Preprocessor directive
 
@@ -199,12 +224,6 @@ class Lexer:
         respawn_pointers = {}
 
         for line in lines:
-            line = line.strip()
-
-            if not line or line.startswith('#'):
-                # Comment or whitespace
-                continue
-
             command, *args = line.split()
 
             if command.startswith('!'):
@@ -218,6 +237,13 @@ class Lexer:
 
                         host_index = self.convert_respawn_coordinates(x, y)
 
+                    tile_coords = Lexer.HOST_INDEX_TO_TILE_COORDS[host_index]
+
+                    # New location is center of host
+                    real_x = tile_coords[0] * 8 + 4
+                    real_y = tile_coords[1] * 8 + 4
+
+                    self.compiler.set_internal_location(real_x, real_y)
                     respawn_pointers[host_index] = 4 * len(words)
 
             else:

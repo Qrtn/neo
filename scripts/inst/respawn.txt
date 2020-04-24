@@ -29,32 +29,75 @@ goto 189 122
 !!copy 11 1 28
 end
 
+# Host 0
 !respawn 60 60
 !!copy 11 1 28
 end
 
+# Host
 !respawn 40 104
-goto 51 88
+goto 61 61
 !!copy 11 1 28
 end
 
 !respawn 104 40
-goto 88 51
+goto 61 61
 !!copy 11 1 28
 end
 
 !respawn 115 119
-!!copy 11 5 28
+!!copy 11 5 28 1 4
+end
 
 !respawn 200 206
+!!copy 11 20 28 1 19
+end
+
 !respawn 107 297
+!!copy 11 14 28 1 13
+end
+
 !respawn 96 222
+!!copy 11 14 28 1 13
+end
+
 !respawn 23 214
+goto 50 222
+!!copy 11 14 28 1 13
+end
+
+# Host 5
 !respawn 49 264
+goto 51 228
+!!copy 11 14 28 1 13
+end
+
 !respawn 260 260
+!!copy 11 16 28 1 15
+end
+
 !respawn 279 214
+goto 258 258
+!!copy 11 16 28 1 15
+end
+
 !respawn 215 278
+goto 258 258
+!!copy 11 16 28 1 15
+end
+
 !respawn 214 22
+!!copy 11 21 28 1 20
+end
+
 !respawn 220 97
+!!copy 11 21 28 1 20
+end
+
 !respawn 297 108
+!!copy 11 21 28 1 20
+end
+
 !respawn 264 50
+!!copy 11 21 28 1 20
+end
