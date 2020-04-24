@@ -1,4 +1,4 @@
-internal_vel 3
+moving_vel 3
 goto 68 68
 chkshoot 60 60
 chkshoot 40 104

@@ -32,10 +32,10 @@ class Compiler:
             'hostcheck': self.hostcheck,
             'chkshoot': self.chkshoot,
             'internal_loc': self.set_internal_location,
-            'internal_vel': self.set_internal_velocity
+            'moving_vel': self.set_moving_velocity
         }
 
-        self.velocity = Compiler.DEFAULT_VELOCITY
+        self.moving_vel = Compiler.DEFAULT_VELOCITY
 
         self.x = 4
         self.y = 4
@@ -62,8 +62,8 @@ class Compiler:
         return [100000000 + int(cycles)]
 
     def go(self, pixels):
-        time = pixels / (self.velocity / 10000)
-        return self.set_velocity(self.velocity) + \
+        time = pixels / (self.moving_vel / 10000)
+        return self.set_velocity(self.moving_vel) + \
             self.delay(time) + self.set_velocity(0)
 
     def get_dist_to(self, x, y):
@@ -87,8 +87,8 @@ class Compiler:
         cmd_angle = self.set_angle(angle)
         cmd_go = self.go(dist)
 
-        actual_dist = int(dist / (self.velocity / 10000)) * \
-            (self.velocity / 10000)
+        actual_dist = int(dist / (self.moving_vel / 10000)) * \
+            (self.moving_vel / 10000)
         actual_angle = math.radians(-int(angle))
 
         dx = actual_dist * math.cos(actual_angle)
@@ -121,8 +121,8 @@ class Compiler:
 
         return []
 
-    def set_internal_velocity(self, internal_velocity):
-        self.velocity = internal_velocity
+    def set_moving_velocity(self, moving_velocity):
+        self.moving_vel = moving_velocity
 
         return []
 
