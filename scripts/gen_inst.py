@@ -22,7 +22,7 @@ class Compiler:
             'angle': self.angle,
             'vel': self.velocity,
             'end': self.end,
-            'jump': self.jump,
+            #'jump': self.jump, # jump is disabled for now due to difficulty in using it
             'delay': self.delay,
             'go': self.go,
             'goto': self.goto,
@@ -184,12 +184,9 @@ class Lexer:
         words = []
         respawn_pointers = {}
 
-        line_counter = 0
-        rewrite_times = {}
         jump_map = {}
 
-        while line_counter < len(lines):
-            line = lines[line_counter]
+        for line in lines:
             line = line.strip()
 
             if line and not line.startswith('#'):
@@ -200,27 +197,7 @@ class Lexer:
                 if command.startswith('!'):
                     # Special command directive
 
-                    if command == '!rewrite':
-                        times = int(args[1])
-                        rewrite_start_at = int(args[0])
-
-                        if line_counter not in rewrite_times:
-                            # Haven't started rewriting yet
-                            rewrite_times[line_counter] = times - 1
-                            # line_counter is -1 for starting at index of line, not line #
-                            # line_counter is -1 again for starting just before the next increment
-                            line_counter = rewrite_start_at - 2
-
-                        elif rewrite_times[line_counter] == 0:
-                            # Finished rewriting
-                            del rewrite_times[line_counter]
-
-                        else:
-                            # Rewrote once
-                            rewrite_times[line_counter] -= 1
-                            line_counter = rewrite_start_at - 2
-
-                    elif command == '!jump':
+                    if command == '!jump':
                         # Be careful with jumping when writing in inst.txt.
                         # Think about what the GENERATED instruction does, not
                         # what the pseudoinstruction in inst.txt does
@@ -244,10 +221,7 @@ class Lexer:
 
                 else:
                     # Normal compiled command
-                    jump_map[line_counter] = len(words)
                     words.extend(self.compiler.parse(command, args))
-
-            line_counter += 1
 
         str_words = [str(i) for i in words]
         output = ' '.join(['.word'] + str_words)
