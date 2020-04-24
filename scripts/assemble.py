@@ -219,14 +219,38 @@ class Lexer:
 
 
 if __name__ == '__main__':
-    inst_filename = sys.argv[1]
+    USAGE = """\
+Example usages:
+
+assemble.py <instruction_file>
+    Outputs movement: and respawn_pointers: data segments.
+
+assemble.py <instruction_file> -r
+    Outputs movement: and respawn_pointers: data segments.
+    Replaces respective lines in spimbot.s
+
+assemble.py <instruction_file> -r <assembly_file>
+    Outputs movement: and respawn_pointers: data segments.
+    Replaces respective lines in <assembly_file>
+    """
+
+    try:
+        inst_filename = sys.argv[1]
+    except:
+        print(USAGE)
+        sys.exit(0)
+
     try:
         replace = sys.argv[2] == '-r'
     except IndexError:
         replace = False
 
     if replace:
-        asm_filename = sys.argv[3]
+        try:
+            asm_filename = sys.argv[3]
+        except IndexError:
+            scripts_dir = os.path.dirname(__file__)
+            asm_filename = os.path.normpath(os.path.join(scripts_dir, '..', 'spimbot.s'))
 
         if not os.path.exists(asm_filename):
             print('No such file', asm_filename)
