@@ -26,16 +26,26 @@ goto 232 56
 chkshoot 264 50
 goto 230 64
 goto 189 122
-!!copy 1 28 11
+!!copy 11 1 28
 end
 
 !respawn 60 60
-!!copy 1 28 11
+!!copy 11 1 28
 end
 
 !respawn 40 104
+goto 51 88
+!!copy 11 1 28
+end
+
 !respawn 104 40
+goto 88 51
+!!copy 11 1 28
+end
+
 !respawn 115 119
+!!copy 11 5 28
+
 !respawn 200 206
 !respawn 107 297
 !respawn 96 222
