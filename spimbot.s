@@ -55,8 +55,6 @@ fire_udp_rounds: .word 0
 ### Arena Map
 arena_map: .byte 0:1600
 
-safety_padding: .byte 0:400
-
 #############
 # Main code #
 #############
