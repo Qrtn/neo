@@ -50,7 +50,7 @@ class Compiler:
 
     @staticmethod
     def end():
-        return [90000]
+        return [20000000]
 
     @staticmethod
     def jump(inst):
