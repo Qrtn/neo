@@ -66,10 +66,10 @@ class Compiler:
         return self.set_velocity(self.velocity) + \
             self.delay(time) + self.set_velocity(0)
 
-    def distTo(self, x, y):
+    def get_dist_to(self, x, y):
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
-    def angleTo(self, x, y):
+    def get_angle_to(self, x, y):
         # y coordinate must be negative due to layout of coordinates on screen
         dy = -(y - self.y)
         dx = x - self.x
@@ -82,8 +82,8 @@ class Compiler:
     def goto(self, x, y):
         # Highly tuned for consistency and accuracy
 
-        angle = self.angleTo(x, y)
-        dist = self.distTo(x, y)
+        angle = self.get_angle_to(x, y)
+        dist = self.get_dist_to(x, y)
         cmd_angle = self.set_angle(angle)
         cmd_go = self.go(dist)
 
@@ -104,7 +104,7 @@ class Compiler:
         return [2000]
 
     def shootpos(self, x, y):
-        angle = self.angleTo(x, y)
+        angle = self.get_angle_to(x, y)
         cmd = self.set_angle(angle) + self.shoot()
         return cmd
 
