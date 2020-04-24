@@ -351,9 +351,8 @@ respawn_bit_2_y:
 	li	$t7, 32
 
 respawn_bit_1_0:
-	# x, y are never 8 or 32 so < vs <= doesn't matter
-	slt	$t1, $t6, $t8			# $t1 is 0 if x <= [8/32], else 1
-	slt	$t2, $t7, $t9			# $t2 is 0 if y <= [8/32], else 1
+	sge	$t1, $t8, $t6			# $t1 is 0 if x < [8/32], else 1
+	sge	$t2, $t9, $t7			# $t2 is 0 if y < [8/32], else 1
 
 	sll	$t1, $t1, 1			# make $t1 into bit 1
 
