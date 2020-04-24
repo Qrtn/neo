@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
 ### Movement Pattern
-# -360 to 360	absolute angle
-# 1500 +- v	velocity
-# 2000		UDP, may be contingent on previous check of arena map
-# 3000 + x	Check arena map, x
-# 3000 + y	Check arena map, y
-# 90000		End program
-# 100000 + cm	Set current_move to cm
-# 100000000 + c	Delay c cycles
+# -360 to 360		absolute angle
+# 1500 +- v		velocity
+# 2000			UDP, may be contingent on previous check of arena map
+# 3000 + (x << 6) + y	Check arena map at x, y and set flag for next UDP
+# 10000000 + cm		Set current_move to cm
+# 20000000		End program
+# 100000000 + c		Delay c cycles
 
 import sys
 import math
