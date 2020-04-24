@@ -15,6 +15,9 @@ import math
 
 import replace_line
 
+class AssemblerError(RuntimeError):
+    pass
+
 class Compiler:
     DEFAULT_VELOCITY = 10
 
@@ -55,7 +58,7 @@ class Compiler:
         return [20000000]
 
     def jump(self, inst):
-        raise DeprecationWarning
+        raise AssemblerError("jump is difficult to use. Don't use it unless you know what you're doing")
         return [10000000 + 4 * int(inst)]
 
     def delay(self, cycles):
@@ -151,6 +154,27 @@ class Lexer:
 
         return arr
 
+    def copy_lines(self, args, lines):
+        args = [int(i) for i in args]
+
+        if len(args) < 3 or len(args) % 2 != 1:
+            raise AssemblerError(
+                "!!copy must have number of times and at least 1 range: "
+                "<times> <start> <end> [<start> <end> ...]")
+
+        times = args[0]
+        ranges = [args[i:i + 2] for i in range(1, len(args), 2)]
+
+        new_lines = []
+
+        for r in ranges:
+            start = r[0] - 1
+            end = r[1]
+
+            new_lines.extend(lines[start:end])
+
+        return new_lines * times
+
     def preprocess(self, lines):
         new_lines = []
 
@@ -161,17 +185,8 @@ class Lexer:
                 command, *args = line.split()
 
                 if command == '!!copy':
-                    start = int(args[0])
-                    end = int(args[1])
-                    try:
-                        times = int(args[2])
-                    except IndexError:
-                        times = 1
-
-                    start_index = start - 1
-                    end_index = end
-
-                    new_lines.extend(lines[start_index:end_index] * times)
+                    copied_lines = self.copy_lines(args, lines)
+                    new_lines.extend(copied_lines)
             else:
                 new_lines.append(line)
 
