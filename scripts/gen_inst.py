@@ -107,12 +107,12 @@ class Compiler:
         return cmd
 
     @staticmethod
-    def hostcheck(x, y):
-        cmd = 3000 + (x << 6) + y
+    def hostcheck(tile_x, tile_y):
+        cmd = 3000 + (tile_x << 6) + tile_y
         return [cmd]
 
     def chkshoot(self, x, y):
-        return hostcheck(x, y) + shootpos(x, y)
+        return self.hostcheck(x // 8, y // 8) + self.shootpos(x, y)
 
     def custom_reset(self):
         return []
