@@ -132,8 +132,18 @@ class Lexer:
     def __init__(self, compiler=Compiler):
         self.compiler = compiler()
 
-    def convert_respawn_coordinates(self, x, y):
-        pass
+    def convert_respawn_coordinates(self, pixel_x, pixel_y):
+        x = pixel_x // 8
+        y = pixel_y // 8
+
+        A = x >= 16
+        B = y >= 16
+        C = (x // 2 >= 16) if A else (x * 2 >= 16)
+        D = (y // 2 >= 16) if B else (y * 2 >= 16)
+
+        host_index = (A << 3) + (B << 2) + (C << 1) + (D << 0)
+
+        return host_index
 
     def dict_to_array(self, d, size=16):
         arr = [0] * size
@@ -222,10 +232,14 @@ class Lexer:
                         words.extend(self.compiler.jump(dest_inst))
 
                     elif command == '!respawn':
-                        x = int(args[0])
-                        y = int(args[1])
+                        if len(args) == 1:
+                            host_index = int(args[0])
+                        else:
+                            x = int(args[0])
+                            y = int(args[1])
 
-                        host_index = self.convert_respawn_coordinates(x, y)
+                            host_index = self.convert_respawn_coordinates(x, y)
+
                         respawn_pointers[host_index] = 4 * len(words)
 
                 else:

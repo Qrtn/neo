@@ -28,7 +28,11 @@ goto 230 64
 goto 189 122
 !!copy 1 28 11
 end
+
 !respawn 60 60
+!!copy 1 28 11
+end
+
 !respawn 40 104
 !respawn 104 40
 !respawn 115 119
