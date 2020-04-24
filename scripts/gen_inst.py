@@ -130,7 +130,35 @@ class Lexer:
     def __init__(self, compiler=Compiler):
         self.compiler = compiler()
 
+    def preprocess(self, lines):
+        new_lines = []
+
+        for line in lines:
+            if line.startswith('!!'):
+                # Preprocessor directive
+
+                command, *args = line.split()
+
+                if command == '!!copy':
+                    start = int(args[0])
+                    end = int(args[1])
+                    try:
+                        times = int(args[2])
+                    except ValueError:
+                        times = 1
+
+                    start_index = start - 1
+                    end_index = end
+
+                    new_lines.extend(lines[start_index:end_index] * times)
+            else:
+                new_lines.append(line)
+
+        return new_lines
+
     def parse(self, lines):
+        lines = self.preprocess(lines)
+
         words = []
 
         line_counter = 0
@@ -141,13 +169,13 @@ class Lexer:
             line = lines[line_counter]
             line = line.strip()
 
-            if not line.startswith('#'):
-                # Not a comment
+            if line and not line.startswith('#'):
+                # Not a comment or whitespace
 
                 command, *args = line.split()
 
                 if command.startswith('!'):
-                    # Preprocessor directive
+                    # Special command directive
 
                     if command == '!rewrite':
                         times = int(args[1])
@@ -155,7 +183,7 @@ class Lexer:
 
                         if line_counter not in rewrite_times:
                             # Haven't started rewriting yet
-                            rewrite_times[line_counter] = times
+                            rewrite_times[line_counter] = times - 1
                             # line_counter is -1 for starting at index of line, not line #
                             # line_counter is -1 again for starting just before the next increment
                             line_counter = rewrite_start_at - 2
