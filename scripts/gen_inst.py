@@ -21,7 +21,7 @@ class Compiler:
     def __init__(self):
         self.instructions = {
             'angle': self.angle,
-            'vel': self.velocity,
+            'vel': self.set_velocity,
             'end': self.end,
             #'jump': self.jump, # jump is disabled for now due to difficulty in using it
             'delay': self.delay,
@@ -31,9 +31,10 @@ class Compiler:
             'shootpos': self.shootpos,
             'hostcheck': self.hostcheck,
             'chkshoot': self.chkshoot,
-            'custom_reset': self.custom_reset,
-            'setloc': self.set_location
+            'internal_loc': self.set_location
         }
+
+        self.velocity = Compiler.DEFAULT_VELOCITY
 
         self.x = 4
         self.y = 4
@@ -43,33 +44,26 @@ class Compiler:
 
         return self.instructions[command](*int_args)
 
-    # TODO: Convert all static methods into normal methods
-    @staticmethod
-    def angle(angle):
+    def angle(self, angle):
         return [int(angle)]
 
-    @staticmethod
-    def velocity(velocity=DEFAULT_VELOCITY):
+    def set_velocity(self, velocity):
         return [1500 + int(velocity)]
 
-    @staticmethod
-    def end():
+    def end(self):
         return [20000000]
 
-    @staticmethod
-    def jump(inst):
+    def jump(self, inst):
         raise DeprecationWarning
         return [10000000 + 4 * int(inst)]
 
-    @staticmethod
-    def delay(cycles):
+    def delay(self, cycles):
         return [100000000 + int(cycles)]
 
-    @staticmethod
-    def go(pixels):
-        time = pixels / (Compiler.DEFAULT_VELOCITY / 10000)
-        return Compiler.velocity(Compiler.DEFAULT_VELOCITY) + \
-            Compiler.delay(time) + Compiler.velocity(0)
+    def go(self, pixels):
+        time = pixels / (self.velocity / 10000)
+        return self.set_velocity(self.velocity) + \
+            self.delay(time) + self.set_velocity(0)
 
     def distTo(self, x, y):
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
@@ -92,8 +86,8 @@ class Compiler:
         cmd_angle = self.angle(angle)
         cmd_go = self.go(dist)
 
-        actualDist = int(dist / (Compiler.DEFAULT_VELOCITY / 10000)) * \
-            (Compiler.DEFAULT_VELOCITY / 10000)
+        actualDist = int(dist / (self.velocity / 10000)) * \
+            (self.velocity / 10000)
         actualAngle = math.radians(-int(angle))
 
         dx = actualDist * math.cos(actualAngle)
@@ -105,8 +99,7 @@ class Compiler:
 
         return cmd_angle + cmd_go
 
-    @staticmethod
-    def shoot():
+    def shoot(self):
         return [2000]
 
     def shootpos(self, x, y):
@@ -114,8 +107,7 @@ class Compiler:
         cmd = self.angle(angle) + self.shoot()
         return cmd
 
-    @staticmethod
-    def hostcheck(tile_x, tile_y):
+    def hostcheck(self, tile_x, tile_y):
         cmd = 3000 + (tile_x << 6) + tile_y
         return [cmd]
 
@@ -126,7 +118,6 @@ class Compiler:
         self.x = x
         self.y = y
 
-    def custom_reset(self):
         return []
 
 
