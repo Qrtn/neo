@@ -87,13 +87,13 @@ class Compiler:
         cmd_angle = self.set_angle(angle)
         cmd_go = self.go(dist)
 
-        actualDist = int(dist / (self.velocity / 10000)) * \
+        actual_dist = int(dist / (self.velocity / 10000)) * \
             (self.velocity / 10000)
-        actualAngle = math.radians(-int(angle))
+        actual_angle = math.radians(-int(angle))
 
-        dx = actualDist * math.cos(actualAngle)
+        dx = actual_dist * math.cos(actual_angle)
         # Flip dy again due to coordinate system
-        dy = -actualDist * math.sin(actualAngle)
+        dy = -actual_dist * math.sin(actual_angle)
 
         self.x = self.x + dx
         self.y = self.y + dy
