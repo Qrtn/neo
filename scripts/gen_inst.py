@@ -10,6 +10,7 @@
 # 100000000 + c		Delay c cycles
 
 import sys
+import os
 import math
 
 import replace_line
@@ -189,9 +190,8 @@ class Lexer:
             line = line.strip()
 
             if not line or line.startswith('#'):
+                # Comment or whitespace
                 continue
-
-            # Not a comment or whitespace
 
             command, *args = line.split()
 
@@ -230,6 +230,10 @@ if __name__ == '__main__':
 
     if replace:
         asm_filename = sys.argv[3]
+
+        if not os.path.exists(asm_filename):
+            print('No such file', asm_filename)
+            sys.exit(1)
 
     lexer = Lexer()
 
