@@ -7,4 +7,8 @@ These seeds cause respawn when adversary.s is blue bot:
 
 	map seed: 1587769659
 	puzzle seed: 1587769659
+	respawns at: host 15
+
+	map seed: 1587770981
+	puzzle seed: 1587770981
 	respawns at: host 9
