@@ -21,6 +21,11 @@ def replace_in_file(file_path, search_text_prev_line, new_text, once=True):
                 found = True
 
 if __name__ == '__main__':
+    """
+    Example usage:
+        ./gen_inst.py $1 | tee /dev/tty | ./replace_line.py ../spimbot.s
+    """
+
     filename = sys.argv[1]
     search_text = 'movement:'
 
