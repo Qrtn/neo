@@ -57,6 +57,7 @@ class Compiler:
 
     @staticmethod
     def jump(inst):
+        raise DeprecationWarning
         return [10000000 + 4 * int(inst)]
 
     @staticmethod
@@ -184,44 +185,32 @@ class Lexer:
         words = []
         respawn_pointers = {}
 
-        jump_map = {}
-
         for line in lines:
             line = line.strip()
 
-            if line and not line.startswith('#'):
-                # Not a comment or whitespace
+            if not line or line.startswith('#'):
+                continue
 
-                command, *args = line.split()
+            # Not a comment or whitespace
 
-                if command.startswith('!'):
-                    # Special command directive
+            command, *args = line.split()
 
-                    if command == '!jump':
-                        # Be careful with jumping when writing in inst.txt.
-                        # Think about what the GENERATED instruction does, not
-                        # what the pseudoinstruction in inst.txt does
+            if command.startswith('!'):
+                # Special lexer command
+                if command == '!respawn':
+                    if len(args) == 1:
+                        host_index = int(args[0])
+                    else:
+                        x = int(args[0])
+                        y = int(args[1])
 
-                        dest = int(args[0])
-                        dest_line = dest - 1
-                        # dest_line is -1 for starting at index of line, not line #
-                        dest_inst = jump_map[dest_line]
-                        words.extend(self.compiler.jump(dest_inst))
+                        host_index = self.convert_respawn_coordinates(x, y)
 
-                    elif command == '!respawn':
-                        if len(args) == 1:
-                            host_index = int(args[0])
-                        else:
-                            x = int(args[0])
-                            y = int(args[1])
+                    respawn_pointers[host_index] = 4 * len(words)
 
-                            host_index = self.convert_respawn_coordinates(x, y)
-
-                        respawn_pointers[host_index] = 4 * len(words)
-
-                else:
-                    # Normal compiled command
-                    words.extend(self.compiler.parse(command, args))
+            else:
+                # Normal compiled command
+                words.extend(self.compiler.parse(command, args))
 
         str_words = [str(i) for i in words]
         output = ' '.join(['.word'] + str_words)
