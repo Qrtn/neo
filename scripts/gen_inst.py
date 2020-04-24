@@ -26,6 +26,8 @@ class Compiler:
             'goto': self.goto,
             'shoot': self.shoot,
             'shootpos': self.shootpos,
+            'hostcheck': self.hostcheck,
+            'chkshoot': self.chkshoot,
             'custom_reset': self.custom_reset
         }
 
@@ -103,6 +105,14 @@ class Compiler:
         angle = self.angleTo(x, y)
         cmd = self.angle(angle) + self.shoot()
         return cmd
+
+    @staticmethod
+    def hostcheck(x, y):
+        cmd = 3000 + (x << 6) + y
+        return [cmd]
+
+    def chkshoot(self, x, y):
+        return hostcheck(x, y) + shootpos(x, y)
 
     def custom_reset(self):
         return []
