@@ -26,6 +26,3 @@ goto 232 56
 shootpos 264 50
 goto 230 64
 goto 189 122
-goto 68 68
-jump 5
-end

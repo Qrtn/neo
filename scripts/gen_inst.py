@@ -14,7 +14,7 @@ import sys
 import math
 
 class Compiler:
-    DEFAULT_VELOCITY = 10
+    DEFAULT_VELOCITY = 2
 
     def __init__(self):
         self.instructions = {
@@ -110,16 +110,21 @@ class Lexer:
     def parse(self, stream):
         words = []
 
-        for line in stream:
-            line = line.strip()
+        for i in range(15):
+            for line in stream:
+                line = line.strip()
 
-            if line.startswith('#'):
-                continue
+                if line.startswith('#'):
+                    continue
 
-            command, *args = line.split()
-            words.extend(self.compiler.parse(command, args))
+                command, *args = line.split()
+                words.extend(self.compiler.parse(command, args))
 
-        output = ['.word'] + [str(i) for i in words]
+            stream.seek(0)
+
+        words.extend(self.compiler.end())
+        str_words = [str(i) for i in words]
+        output = ['.word'] + str_words
         return ' '.join(output)
 
 
