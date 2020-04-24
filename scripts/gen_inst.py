@@ -53,7 +53,7 @@ class Compiler:
 
     @staticmethod
     def jump(inst):
-        return [100000 + 4 * (int(inst) - 1)]
+        return [10000000 + 4 * int(inst)]
 
     @staticmethod
     def delay(cycles):
@@ -148,7 +148,7 @@ class Lexer:
                         if line_counter not in rewrite_times:
                             # Haven't started rewriting yet
                             rewrite_times[line_counter] = times
-                            # line_counter is -1 for starting at index
+                            # line_counter is -1 for starting at index of line, not line #
                             # line_counter is -1 again for starting just before the next increment
                             line_counter = rewrite_start_at - 2
 
@@ -160,6 +160,17 @@ class Lexer:
                             # Rewrote once
                             rewrite_times[line_counter] -= 1
                             line_counter = rewrite_start_at - 2
+
+                    elif command == '!jump':
+                        # Be careful with jumping when writing in inst.txt.
+                        # Think about what the GENERATED instruction does, not
+                        # what the pseudoinstruction in inst.txt does
+
+                        dest = int(args[0])
+                        dest_line = dest - 1
+                        # dest_line is -1 for starting at index of line, not line #
+                        dest_inst = jump_map[dest_line]
+                        words.extend(self.compiler.jump(dest_inst))
 
                 else:
                     # Normal compiled command
