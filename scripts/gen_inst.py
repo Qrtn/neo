@@ -165,7 +165,7 @@ class Lexer:
                     end = int(args[1])
                     try:
                         times = int(args[2])
-                    except ValueError:
+                    except IndexError:
                         times = 1
 
                     start_index = start - 1

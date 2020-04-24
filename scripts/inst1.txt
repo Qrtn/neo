@@ -26,5 +26,5 @@ goto 232 56
 chkshoot 264 50
 goto 230 64
 goto 189 122
-!rewrite 1 11
+!!copy 1 28 11
 end
