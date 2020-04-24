@@ -1,4 +1,5 @@
 goto 68 68
+hostcheck 60 60
 shootpos 60 60
 shootpos 40 104
 shootpos 104 40
