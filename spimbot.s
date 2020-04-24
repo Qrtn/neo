@@ -185,6 +185,7 @@ timer_interrupt:
 
 	lw	$t0, current_move		# load instruction counter
 
+# INSTRUCTION
 execute_until_delay:				# main instruction loop that hands control back to user when delaying
 	lw	$t1, movement($t0)		# load instruction
 
@@ -215,6 +216,7 @@ no_debug:
 	blt	$t1, 100000000, execute_jump
 	j	return_delay
 
+# INSTRUCTION
 execute_angle:					# set angle
 	lw	$t9, is_blue_bot		# orientation matters
 	beq	$t9, $zero, angle_write		# don't add 180 if starting top-left (red bot)
@@ -228,11 +230,13 @@ angle_write:
 	sw	$t2, ANGLE_CONTROL		# 1 = "absolute" angle control and store confirms and sets angle
 	j	execute_until_delay
 
+# INSTRUCTION
 execute_velocity:				# set velocity
 	sub	$t2, $t1, 1500			# subtract opcode offset
 	sw	$t2, VELOCITY
 	j	execute_until_delay
 
+# INSTRUCTION
 execute_udp:					# fire certain number of udp rounds (as set by hostcheck)
 	lw	$t9, fire_udp_rounds
 
@@ -247,6 +251,7 @@ udp_done:
 
 	j	execute_until_delay
 
+# INSTRUCTION
 execute_hostcheck:				# hostcheck sets appropriate # of UDP
 	la	$t5, arena_map			# packets to fire at the host at given (x, y)
 	sw	$t5, ARENA_MAP
@@ -288,18 +293,19 @@ hostcheck_add_0:
 	sw	$t9, fire_udp_rounds		# 0 shots if friendly
 	j	execute_until_delay
 
-hostcheck_no_fire:
-
+# INSTRUCTION
 execute_jump:					# unconditional jump to offset in instruction
 	sub	$t0, $t1, 10000000		# subtract "opcode"
 	j	execute_until_delay
 
+# INSTRUCTION
 return_delay:					# sets up a delay and returns control to user
 	sub	$t1, $t1, 100000000		# subtract "opcode"
 	lw	$t2, TIMER
 	add	$t2, $t2, $t1			# add delay (in cycles) to current cycle count
 	sw	$t2, TIMER			# request interrupt
 
+# INSTRUCTION
 return_end:
 	sw	$t0, current_move
 	j	interrupt_dispatch		# see if other interrupts are waiting
