@@ -8,18 +8,18 @@ coordinates.
 This is the mapping scheme:
 
 	index bits: ABCD
-	A = x < 16
-	B = y < 16
-	C = A ? (x * 2 < 16) : (x // 2 < 16)
-	D = B ? (y * 2 < 16) : (y // 2 < 16)
+	A = x >= 16
+	B = y >= 16
+	C = A ? (x * 2 >= 16) : (x // 2 >= 16)
+	D = B ? (y * 2 >= 16) : (y // 2 >= 16)
 
 Having a 1-to-1 function means minimal memory usage and no wasted space on
 unused pointers in the array.
 
 Implemented as:
 
-	C = A ? (x < 8) : (x < 32)
-	D = B ? (y < 8) : (y < 32)
+	C = A ? (x >= 32) : (x >= 8)
+	D = B ? (y >= 32) : (y >= 8)
 
 Host locations:
 
