@@ -20,7 +20,7 @@ class Compiler:
 
     def __init__(self):
         self.instructions = {
-            'angle': self.angle,
+            'angle': self.set_angle,
             'vel': self.set_velocity,
             'end': self.end,
             #'jump': self.jump, # jump is disabled for now due to difficulty in using it
@@ -31,7 +31,8 @@ class Compiler:
             'shootpos': self.shootpos,
             'hostcheck': self.hostcheck,
             'chkshoot': self.chkshoot,
-            'internal_loc': self.set_location
+            'internal_loc': self.set_internal_location,
+            'internal_vel': self.set_internal_velocity
         }
 
         self.velocity = Compiler.DEFAULT_VELOCITY
@@ -44,7 +45,7 @@ class Compiler:
 
         return self.instructions[command](*int_args)
 
-    def angle(self, angle):
+    def set_angle(self, angle):
         return [int(angle)]
 
     def set_velocity(self, velocity):
@@ -83,7 +84,7 @@ class Compiler:
 
         angle = self.angleTo(x, y)
         dist = self.distTo(x, y)
-        cmd_angle = self.angle(angle)
+        cmd_angle = self.set_angle(angle)
         cmd_go = self.go(dist)
 
         actualDist = int(dist / (self.velocity / 10000)) * \
@@ -104,7 +105,7 @@ class Compiler:
 
     def shootpos(self, x, y):
         angle = self.angleTo(x, y)
-        cmd = self.angle(angle) + self.shoot()
+        cmd = self.set_angle(angle) + self.shoot()
         return cmd
 
     def hostcheck(self, tile_x, tile_y):
@@ -114,9 +115,14 @@ class Compiler:
     def chkshoot(self, x, y):
         return self.hostcheck(x // 8, y // 8) + self.shootpos(x, y)
 
-    def set_location(self, x, y):
+    def set_internal_location(self, x, y):
         self.x = x
         self.y = y
+
+        return []
+
+    def set_internal_velocity(self, internal_velocity):
+        self.velocity = internal_velocity
 
         return []
 
