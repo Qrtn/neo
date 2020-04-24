@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 import sys
-
 import fileinput
 
 def replace_in_file(file_path, search_text_prev_line, new_text, once=True):

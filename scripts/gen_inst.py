@@ -12,6 +12,8 @@
 import sys
 import math
 
+import replace_line
+
 class Compiler:
     DEFAULT_VELOCITY = 10
 
@@ -130,6 +132,16 @@ class Lexer:
     def __init__(self, compiler=Compiler):
         self.compiler = compiler()
 
+    def convert_respawn_coordinates(self, x, y):
+        pass
+
+    def dict_to_array(self, d, size=16):
+        arr = [0] * size
+        for key, val in d.items():
+            arr[key] = val
+
+        return arr
+
     def preprocess(self, lines):
         new_lines = []
 
@@ -160,6 +172,7 @@ class Lexer:
         lines = self.preprocess(lines)
 
         words = []
+        respawn_pointers = {}
 
         line_counter = 0
         rewrite_times = {}
@@ -208,6 +221,13 @@ class Lexer:
                         dest_inst = jump_map[dest_line]
                         words.extend(self.compiler.jump(dest_inst))
 
+                    elif command == '!respawn':
+                        x = int(args[0])
+                        y = int(args[1])
+
+                        host_index = self.convert_respawn_coordinates(x, y)
+                        respawn_pointers[host_index] = 4 * len(words)
+
                 else:
                     # Normal compiled command
                     jump_map[line_counter] = len(words)
@@ -216,18 +236,35 @@ class Lexer:
             line_counter += 1
 
         str_words = [str(i) for i in words]
-        output = ['.word'] + str_words
-        return ' '.join(output)
+        output = ' '.join(['.word'] + str_words)
+
+        respawn_pointers_arr = [str(i) for i in self.dict_to_array(respawn_pointers)]
+        respawn_pointers_output = ' '.join(['.word'] + respawn_pointers_arr)
+
+        return output, respawn_pointers_output
 
 
 if __name__ == '__main__':
-    filename = sys.argv[1]
+    inst_filename = sys.argv[1]
+    try:
+        replace = sys.argv[2] == '-r'
+    except IndexError:
+        replace = False
+
+    if replace:
+        asm_filename = sys.argv[3]
 
     lexer = Lexer()
 
-    with open(filename) as f:
+    with open(inst_filename) as f:
         lines = f.readlines()
 
-    output = lexer.parse(lines)
+    output, respawn_pointers_output = lexer.parse(lines)
 
     print(output)
+    print(respawn_pointers_output)
+
+    if replace:
+        replace_line.replace_in_file(asm_filename, 'movement:', output + '\n')
+        replace_line.replace_in_file(asm_filename, 'respawn_pointers:',
+            respawn_pointers_output + '\n')
