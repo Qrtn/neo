@@ -14,7 +14,7 @@ import sys
 import math
 
 class Compiler:
-    DEFAULT_VELOCITY = 2
+    DEFAULT_VELOCITY = 10
 
     def __init__(self):
         self.instructions = {
@@ -26,7 +26,8 @@ class Compiler:
             'go': self.go,
             'goto': self.goto,
             'shoot': self.shoot,
-            'shootpos': self.shootpos
+            'shootpos': self.shootpos,
+            'custom_reset': self.custom_reset
         }
 
         self.x = 4
@@ -79,9 +80,11 @@ class Compiler:
     def goto(self, x, y):
         angle = self.angleTo(x, y)
         dist = self.distTo(x, y)
-        cmd = self.angle(angle) + self.go(dist)
+        cmd_angle = self.angle(angle)
+        cmd_go = self.go(dist)
 
-        actualDist = int(dist)
+        actualDist = int(dist / (Compiler.DEFAULT_VELOCITY / 10000)) * \
+            (Compiler.DEFAULT_VELOCITY / 10000)
         actualAngle = math.radians(-int(angle))
 
         dx = actualDist * math.cos(actualAngle)
@@ -91,7 +94,7 @@ class Compiler:
         self.x = self.x + dx
         self.y = self.y + dy
 
-        return cmd
+        return cmd_angle + cmd_go
 
     @staticmethod
     def shoot():
@@ -101,6 +104,9 @@ class Compiler:
         angle = self.angleTo(x, y)
         cmd = self.angle(angle) + self.shoot()
         return cmd
+
+    def custom_reset(self):
+        return []
 
 
 class Lexer:
