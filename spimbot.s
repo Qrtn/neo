@@ -68,29 +68,29 @@ main:
 	or      $t4, $t4, 1				# global enable
 	mtc0    $t4, $12
 
-	li	$t0, 1000
-	sw	$t0, TIMER
+	li	$t0, 1000				# Kick off kernel instruction
+	sw	$t0, TIMER				# loop after 1000 cycles
 
-	la      $s0, puzzle
+	la      $s0, puzzle				# Puzzle address
 
 request_puzzle:
-	sw      $s0, REQUEST_PUZZLE
+	sw      $s0, REQUEST_PUZZLE			# Request puzzle
 
 check_puzzle_available:
-	lw      $t0, has_puzzle
-	beq     $t0, $zero, check_puzzle_available
+	lw      $t0, has_puzzle				# Kernel writes to has_puzzle when puzzle is available
+	beq     $t0, $zero, check_puzzle_available	# has_puzzle used to communicate between kernel and user
 
-	la      $a0, puzzle				# load arguments
+	la      $a0, puzzle				# Load arguments
 	la      $a1, solution
 	li      $a2, 0
 	li      $a3, 0
 
-	jal	solve					# call solver
+	jal	solve					# Call solver
 
-	la	$t0, solution				# submit solution
+	la	$t0, solution				# Submit solution
 	sw	$t0, SUBMIT_SOLUTION
 
-	sw	$zero, has_puzzle			# reset has_puzzle
+	sw	$zero, has_puzzle			# Reset has_puzzle
 
 	j	request_puzzle
 
@@ -106,12 +106,12 @@ unhandled_str:    .asciiz "Unhandled interrupt type\n"
 .ktext 0x80000180
 interrupt_handler:
 .set noat
-	move    $k1, $at        # Save $at
-# NOTE: Don't touch $k1 or else you destroy $at!
+	move    $k1, $at			# Save $at
+						# NOTE: Don't touch $k1 or else you destroy $at!
 .set at
 	la      $k0, chunkIH
-	sw      $a0, 0($k0)        # Get some free registers
-	sw      $v0, 4($k0)        # by storing them to a global variable
+	sw      $a0, 0($k0)			# Get some free registers
+	sw      $v0, 4($k0)			# by storing them to a global variable
 	sw      $t0, 8($k0)
 	sw      $t1, 12($k0)
 	sw      $t2, 16($k0)
@@ -123,28 +123,25 @@ interrupt_handler:
 	sw      $t8, 40($k0)
 	sw      $t9, 44($k0)
 
-    # Save coprocessor1 registers!
-    # If you don't do this and you decide to use division or multiplication
-    #   in your main code, and interrupt handler code, you get WEIRD bugs.
+	# Save coprocessor1 registers!
+	# If you don't do this and you decide to use division or multiplication
+	#   in your main code, and interrupt handler code, you get WEIRD bugs.
 	mfhi    $t0
 	sw      $t0, 48($k0)
 	mflo    $t0
 	sw      $t0, 52($k0)
 
-	mfc0    $k0, $13                # Get Cause register
+	mfc0    $k0, $13                	# Get Cause register
 	srl     $a0, $k0, 2
-	and     $a0, $a0, 0xf           # ExcCode field
+	and     $a0, $a0, 0xf           	# ExcCode field
 	bne     $a0, 0, non_intrpt
 
-interrupt_dispatch:                 # Interrupt:
-	mfc0    $k0, $13                # Get Cause register, again
-	beq     $k0, 0, done            # handled all outstanding interrupts
+interrupt_dispatch:				# Interrupt:
+	mfc0    $k0, $13			# Get Cause register, again
+	beq     $k0, 0, done			# handled all outstanding interrupts
 
-	and     $a0, $k0, TIMER_INT_MASK    # is there a timer interrupt?
+	and     $a0, $k0, TIMER_INT_MASK	# is there a timer interrupt?
 	bne     $a0, 0, timer_interrupt
-
-	and     $a0, $k0, BONK_INT_MASK     # is there a bonk interrupt?
-	bne     $a0, 0, bonk_interrupt
 
 	and     $a0, $k0, REQUEST_PUZZLE_INT_MASK
 	bne     $a0, 0, request_puzzle_interrupt
@@ -152,15 +149,17 @@ interrupt_dispatch:                 # Interrupt:
 	and     $a0, $k0, RESPAWN_INT_MASK
 	bne     $a0, 0, respawn_interrupt
 
-	li      $v0, PRINT_STRING       # Unhandled interrupt types
+	and     $a0, $k0, BONK_INT_MASK		# is there a bonk interrupt?
+	bne     $a0, 0, bonk_interrupt		# Bonk interrupt currently unused
+
+	li      $v0, PRINT_STRING		# Unhandled interrupt types
 	la      $a0, unhandled_str
 	syscall
 	j       done
 
 bonk_interrupt:
 	sw      $0, BONK_ACK
-    #Fill in your bonk handler code here
-	j       interrupt_dispatch      # see if other interrupts are waiting
+	j       interrupt_dispatch		# see if other interrupts are waiting
 
 ### Movement Pattern
 # -360 to 360		absolute angle
@@ -174,14 +173,14 @@ bonk_interrupt:
 timer_interrupt:
 	sw      $zero, TIMER_ACK
 
-	lw	$t0, current_move
+	lw	$t0, current_move		# load instruction counter
 
-execute_until_delay:
-	lw	$t1, movement($t0)
+execute_until_delay:				# main instruction loop that hands control back to user when delaying
+	lw	$t1, movement($t0)		# load instruction
 
-	add	$t0, $t0, 4
+	add	$t0, $t0, 4			# increment instruction counter
 
-	li	$t9, DEBUG		# DEBUG on prints out current x, y on each cmd
+	li	$t9, DEBUG			# DEBUG on prints out current x, y on each cmd
 	beq	$t9, $zero, no_debug
 
 	li      $v0, PRINT_INT
@@ -198,18 +197,18 @@ execute_until_delay:
 	syscall
 
 no_debug:
-	blt	$t1, 1000, execute_angle
-	blt	$t1, 2000, execute_velocity
-	beq	$t1, 2000, execute_udp
+	blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
+	blt	$t1, 2000, execute_velocity	# depending on range of instruction (think of it like a weird
+	beq	$t1, 2000, execute_udp		# opcode that works with integer ranges instead of bits)
 	blt	$t1, 10000000, execute_hostcheck
 	beq	$t1, 20000000, return_end
 	blt	$t1, 100000000, execute_jump
 	j	return_delay
 
-execute_angle:
-	sw	$t1, ANGLE
-	li	$t2, 1
-	sw	$t2, ANGLE_CONTROL
+execute_angle:					# set angle
+	sw	$t1, ANGLE			# angle comes directly from command parameter
+	li	$t2, 1				# since there is no opcode offset
+	sw	$t2, ANGLE_CONTROL		# "absolute" angle control and confirms angle
 	j	execute_until_delay
 
 execute_velocity:
@@ -231,16 +230,16 @@ udp_done:
 
 	j	execute_until_delay
 
-execute_hostcheck:
-	la	$t5, arena_map
+execute_hostcheck:				# hostcheck sets appropriate # of UDP
+	la	$t5, arena_map			# packets to fire at the host at given (x, y)
 	sw	$t5, ARENA_MAP
 
-	sub	$t2, $t1, 3000		# command offset
-	srl	$t3, $t2, 6		# x-tile (NOT pixel!)
-	and	$t4, $t2, 0x3f		# y-tile (NOT pixel!)
+	sub	$t2, $t1, 3000			# command offset
+	srl	$t3, $t2, 6			# x-tile (NOT pixel!)
+	and	$t4, $t2, 0x3f			# y-tile (NOT pixel!)
 
-	mul	$t4, $t4, 40		# map[y][x] == map[y * 40 + x]
-	add	$t3, $t3, $t4		# index at $t3
+	mul	$t4, $t4, 40			# map[y][x] == map[y * 40 + x]
+	add	$t3, $t3, $t4			# index at $t3
 
 	li	$t9, 0				# number of shots to fire
 
@@ -251,6 +250,8 @@ execute_hostcheck:
 
 	and	$t8, $t6, 8			# check enemy host
 	beq	$t8, $zero, hostcheck_add_1 	# branch if neutral host
+
+	# enemy host: fall-through to 2 total shots
 
 	add	$t9, $t9, 1			# 2 total shots if enemy
 
@@ -279,7 +280,6 @@ return_end:
 
 request_puzzle_interrupt:
 	sw      $0, REQUEST_PUZZLE_ACK
-    #Fill in your puzzle interrupt code here
 
 	# Write true to M[has_puzzle]
 	la	$t0, has_puzzle
@@ -290,21 +290,19 @@ request_puzzle_interrupt:
 
 respawn_interrupt:
 	sw      $0, RESPAWN_ACK
-    #Fill in your respawn handler code here
 	j       interrupt_dispatch
 
-non_intrpt:                         # was some non-interrupt
+non_intrpt:				# was some non-interrupt
 	li      $v0, PRINT_STRING
 	la      $a0, non_intrpt_str
-	syscall                         # print out an error message
-# fall through to done
-
+	syscall				# print out an error message
+					# fall through to done
 done:
 	la      $k0, chunkIH
 
-    # Restore coprocessor1 registers!
-    # If you don't do this and you decide to use division or multiplication
-    #   in your main code, and interrupt handler code, you get WEIRD bugs.
+	# Restore coprocessor1 registers!
+	# If you don't do this and you decide to use division or multiplication
+	#   in your main code, and interrupt handler code, you get WEIRD bugs.
 	lw      $t0, 48($k0)
 	mthi    $t0
 	lw      $t0, 52($k0)
@@ -324,7 +322,7 @@ done:
 	lw      $t9, 44($k0)
 
 .set noat
-	move    $at, $k1        # Restore $at
+	move    $at, $k1		# Restore $at
 .set at
 	eret
 
