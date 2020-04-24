@@ -1,3 +1,3 @@
 #!/bin/sh
 
-QtSpimbot -file ../spimbot.s -file2 ../spimbot.s $*
+QtSpimbot -file ../spimbot.s -file2 ../adversary.s $*

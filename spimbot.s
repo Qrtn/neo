@@ -304,6 +304,8 @@ return_delay:					# sets up a delay and returns control to user
 	add	$t2, $t2, $t1			# add delay (in cycles) to current cycle count
 	sw	$t2, TIMER			# request interrupt
 
+	# fall-through to storing current instruction and returning control
+
 # INSTRUCTION
 return_end:
 	sw	$t0, current_move
@@ -320,7 +322,52 @@ request_puzzle_interrupt:
 	j	interrupt_dispatch
 
 respawn_interrupt:
+	# Need to stop timer loop before acknowledging respawn to stop any
+	# pending timer loop
+	sw	$zero, TIMER_ACK
+
+	# Acknowledge respawn. This puts the bot back into play
 	sw	$0, RESPAWN_ACK
+
+	lw	$t8, BOT_X			# get current location
+	lw	$t9, BOT_Y			# more details on host mapping in scripts/host_mapping.md
+
+	srl	$t8, $t8, 3			# convert pixels to tiles (divide by 8)
+	srl	$t9, $t9, 3
+
+	li	$t0, 0				# bitstring for pointer array index. Bits "3210", 0 is LSB
+
+	li	$t6, 8				# what x will be compared to for bit 3
+	li	$t7, 8				# what y will be compared to for bit 2
+
+respawn_bit_3_x:
+	blt	$t8, 16, respawn_bit_2_y
+	or	$t0, $t0, 8			# set bit 3
+	li	$t6, 32
+
+respawn_bit_2_y:
+	blt	$t9, 16, respawn_bit_1_0
+	or	$t0, $t0, 4			# set bit 2
+	li	$t7, 32
+
+respawn_bit_1_0:
+	# x, y are never 8 or 32 so < vs <= doesn't matter
+	slt	$t1, $t6, $t8			# $t1 is 0 if x <= [8/32], else 1
+	slt	$t2, $t7, $t9			# $t2 is 0 if y <= [8/32], else 1
+
+	sll	$t1, $t1, 1			# make $t1 into bit 1
+
+	or	$t0, $t0, $t1			# set bit 1
+	or	$t0, $t0, $t2			# set bit 0
+
+	# convert number to offset for the int array (respawn pointers)
+	sll	$t0, $t0, 2			# multiply by 4
+
+	lw	$t5, respawn_pointers($t0)	# load in instruction to start at
+
+	sw	$t5, current_move		# set instruction counter
+	sw	$zero, TIMER			# request timer interrupt immediately so timer loop takes over
+
 	j	interrupt_dispatch
 
 non_intrpt:					# was some non-interrupt

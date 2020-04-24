@@ -16,6 +16,11 @@ This is the mapping scheme:
 Having a 1-to-1 function means minimal memory usage and no wasted space on
 unused pointers in the array.
 
+Implemented as:
+
+	C = A ? (x < 8) : (x < 32)
+	D = B ? (y < 8) : (y < 32)
+
 Host locations:
 
 	# Top-left
