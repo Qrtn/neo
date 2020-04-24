@@ -179,7 +179,6 @@ class Lexer:
 
             line_counter += 1
 
-        words.extend(self.compiler.end())
         str_words = [str(i) for i in words]
         output = ['.word'] + str_words
         return ' '.join(output)
