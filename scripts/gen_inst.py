@@ -40,6 +40,7 @@ class Compiler:
 
         return self.instructions[command](*int_args)
 
+    # TODO: Convert all static methods into normal methods
     @staticmethod
     def angle(angle):
         return [int(angle)]

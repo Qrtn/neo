@@ -263,8 +263,8 @@ execute_hostcheck:				# hostcheck sets appropriate # of UDP
 	lw	$t9, is_blue_bot		# orientation matters
 	beq	$t9, $zero, hostcheck_loadtile	# don't change tile if red bot
 
-	sub	$t3, $t3, 320			# fall-through to flipping tile across y = x
-	sub	$t4, $t4, 320			# (i.e. x = 320 - x; y = 320 - y)
+	sub	$t3, $t3, 39			# fall-through to flipping tile across y = x
+	sub	$t4, $t4, 39			# (i.e. x = 39 - x; y = 39 - y)
 	abs	$t3, $t3
 	abs	$t4, $t4
 
