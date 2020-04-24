@@ -28,7 +28,8 @@ class Compiler:
             'shootpos': self.shootpos,
             'hostcheck': self.hostcheck,
             'chkshoot': self.chkshoot,
-            'custom_reset': self.custom_reset
+            'custom_reset': self.custom_reset,
+            'setloc': self.set_location
         }
 
         self.x = 4
@@ -79,6 +80,8 @@ class Compiler:
         return math.degrees(angle)
 
     def goto(self, x, y):
+        # Highly tuned for consistency and accuracy
+
         angle = self.angleTo(x, y)
         dist = self.distTo(x, y)
         cmd_angle = self.angle(angle)
@@ -113,6 +116,10 @@ class Compiler:
 
     def chkshoot(self, x, y):
         return self.hostcheck(x // 8, y // 8) + self.shootpos(x, y)
+
+    def set_location(self, x, y):
+        self.x = x
+        self.y = y
 
     def custom_reset(self):
         return []
