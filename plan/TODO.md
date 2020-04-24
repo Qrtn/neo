@@ -1,0 +1,1 @@
+- assemble.py should generate from a template, not just replace a line
