@@ -13,7 +13,7 @@ import sys
 import math
 
 class Compiler:
-    DEFAULT_VELOCITY = 10
+    DEFAULT_VELOCITY = 1
 
     def __init__(self):
         self.instructions = {
