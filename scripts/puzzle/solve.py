@@ -5,6 +5,9 @@ import subprocess
 
 CPP_SOLVE = os.path.join(os.path.dirname(__file__), 'cpp_solve', 'solve')
 
+class UnsolvablePuzzle(RuntimeError):
+    pass
+
 def solve(puzzle_dim, board):
     params = [puzzle_dim.num_rows, puzzle_dim.num_cols,
         puzzle_dim.num_colors]
@@ -15,7 +18,15 @@ def solve(puzzle_dim, board):
     stdin = ' '.join(str(i) for i in params) + '\n'
     stdin = stdin.encode('utf-8')
 
-    proc = subprocess.run(CPP_SOLVE, input=stdin, check=True, capture_output=True)
+    solvable = True
+    try:
+        proc = subprocess.run(CPP_SOLVE, input=stdin, check=True, capture_output=True)
+    except subprocess.CalledProcessError:
+        solvable = False
+
+    if not solvable:
+        raise UnsolvablePuzzle()
+
     output = proc.stdout
 
     solution_1d = [int(i) for i in output.split()]

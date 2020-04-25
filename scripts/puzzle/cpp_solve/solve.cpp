@@ -19,7 +19,12 @@ int main() {
 
     std::fill(std::begin(puzzle.clue), std::end(puzzle.clue), false);
 
-    lightsout::solve(&puzzle, solution, 0, 0);
+    bool solvable = lightsout::solve(&puzzle, solution, 0, 0);
+
+    if (!solvable) {
+        std::cerr << "No solution found" << std::endl;
+        return -1;
+    }
 
     for (int i = 0; i < puzzle.num_rows; ++i) {
         for (int j = 0; j < puzzle.num_cols; ++j) {
@@ -31,4 +36,6 @@ int main() {
     }
 
     std::cout << std::endl;
+
+    return 0;
 }
