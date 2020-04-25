@@ -287,8 +287,7 @@ assemble.py <instruction_file> -r <assembly_file>
     if not replace:
         print(output)
         print(respawn_pointers_output)
-
-    if replace:
+    else:
         replace_line.replace_in_file(asm_filename, 'movement:', output + '\n')
         replace_line.replace_in_file(asm_filename, 'respawn_pointers:',
             respawn_pointers_output + '\n')
