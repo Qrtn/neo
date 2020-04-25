@@ -23,10 +23,24 @@ def encode_row(puzzle_dim, row):
     bits = 0
 
     for i in row:
-        bits += i
         bits <<= cell_bit_width
+        bits += i
 
     return bits
+
+def decode_row(puzzle_dim, row_bits):
+    cell_bit_width = 1 if puzzle_dim.num_colors == 2 else 2
+    cell_mask = 0b1 if cell_bit_width == 1 else 0b11
+
+    row = [0] * puzzle_dim.num_cols
+
+    for bit in range(puzzle_dim.num_cols):
+        state = row_bits & cell_mask
+        row[-(bit + 1)] = state
+
+        row_bits >>= cell_bit_width
+
+    return row
 
 def encode_puzzle_row(puzzle_dim, bottom_row):
     dim_id_bits = puzzle_dim.dim_id << ENCODED_ROW_WIDTH
@@ -99,7 +113,7 @@ generate_lookup.py -r <assembly_file>
     Generates lookup table and replaces respective line in <assembly_file>
 
 generate_lookup.py -h
-    Prints usage
+    Prints usage\
     """
 
     replace = False
