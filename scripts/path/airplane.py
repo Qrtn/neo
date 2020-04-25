@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from pprint import pprint
 
 MAX_BOARD_XY = 319
 
-def reflect_points(points, x_pos):
-    if x_pos:
+def reflect_points(points, rotational):
+    if rotational:
         return [(MAX_BOARD_XY - p[0], MAX_BOARD_XY - p[1]) for p in points]
     else:
         return [(MAX_BOARD_XY - p[1], MAX_BOARD_XY - p[0]) for p in points]
@@ -48,7 +48,8 @@ goto_points = [
 reflect_goto_points = reflect_points(goto_points, True)
 goto_points = combine_and_dedupe(goto_points, reflect_goto_points)
 
-pprint(goto_points)
+def print_goto_points():
+    pprint(goto_points)
 
 udp_targets = [
     [(60, 60), (45, 104), (104, 45)],
@@ -73,6 +74,34 @@ reflect_udp_targets_2 = [sorted(reflect_points(points, True)) for points in
 
 udp_targets = combine_and_dedupe(udp_targets, reflect_udp_targets_2)
 
-pprint(udp_targets)
+def print_udp_targets():
+    pprint(udp_targets)
 
 assert len(goto_points) == len(udp_targets)
+
+respawn_paths = [
+    ([], 0),
+    ([], 0),
+    ([], 0),
+    ([], 1),
+    ([], 4),
+    ([(52, 247)], 3),
+    ([], 2),
+    ([], 2),
+]
+
+reflect_respawn_paths = []
+
+for path in respawn_paths:
+    new_path = (reflect_points(path[0], True), path[1] + len(goto_points) // 2)
+    reflect_respawn_paths.append(new_path)
+
+reflect_respawn_paths.reverse()
+
+respawn_paths += reflect_respawn_paths
+
+def print_respawn_paths():
+    for i, path in enumerate(respawn_paths):
+        print(i, str(path[0]).ljust(8), path[1], goto_points[path[1]], sep='\t')
+
+print_respawn_paths()
