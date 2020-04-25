@@ -243,14 +243,15 @@ if __name__ == '__main__':
 Example usages:
 
 assemble.py <instruction_file>
-    Outputs movement: and respawn_pointers: data segments.
+    Assembles movement: and respawn_pointers: data segments.
+    Outputs to stdout.
 
 assemble.py <instruction_file> -r
-    Outputs movement: and respawn_pointers: data segments.
+    Assembles movement: and respawn_pointers: data segments.
     Replaces respective lines in spimbot.s
 
 assemble.py <instruction_file> -r <assembly_file>
-    Outputs movement: and respawn_pointers: data segments.
+    Assembles movement: and respawn_pointers: data segments.
     Replaces respective lines in <assembly_file>
     """
 
@@ -283,8 +284,9 @@ assemble.py <instruction_file> -r <assembly_file>
 
     output, respawn_pointers_output = lexer.parse(lines)
 
-    print(output)
-    print(respawn_pointers_output)
+    if not replace:
+        print(output)
+        print(respawn_pointers_output)
 
     if replace:
         replace_line.replace_in_file(asm_filename, 'movement:', output + '\n')

@@ -2,7 +2,7 @@
 
 
 # Main section (executes on initial spawn)
-goto 59 59
+goto 65 65
 chkshoot 45 104
 chkshoot 60 60
 chkshoot 104 45
@@ -27,7 +27,7 @@ chkshoot 108 296
 goto 135 199
 chkshoot 113 119
 chkshoot 200 204
-goto 260 260
+goto 254 254
 chkshoot 215 274
 chkshoot 259 259
 chkshoot 274 215

@@ -4,7 +4,7 @@ from pprint import pprint
 from path_generator import *
 
 goto_points = [
-    (59, 59),
+    (65, 65),
     (120, 184),
     (80, 232),
     (56, 232),
@@ -12,7 +12,6 @@ goto_points = [
     (87, 263),
     (87, 240),
     (135, 199),
-    (260, 260),
 ]
 
 reflect_goto_points = reflect_points(goto_points, True)
