@@ -1,0 +1,116 @@
+goto 68 68
+chkshoot 60 60
+chkshoot 40 104
+chkshoot 104 40
+goto 120 190
+chkshoot 115 119
+chkshoot 200 206
+goto 75 229
+chkshoot 107 297
+chkshoot 96 222
+goto 55 229
+chkshoot 23 214
+chkshoot 49 264
+goto 75 229
+goto 120 190
+goto 250 250
+chkshoot 260 260
+chkshoot 279 214
+chkshoot 215 278
+goto 190 119
+goto 231 61
+chkshoot 214 22
+chkshoot 220 97
+chkshoot 297 108
+goto 232 56
+chkshoot 264 50
+goto 230 64
+goto 189 122
+!!copy 11 1 28
+end
+
+# Host 0
+!respawn 60 60
+!!copy 11 1 28
+end
+
+# Host 1
+!respawn 40 104
+goto 61 61
+!!copy 11 1 28
+end
+
+# Host 2
+!respawn 104 40
+goto 61 61
+!!copy 11 1 28
+end
+
+# Host 3
+!respawn 115 119
+!!copy 11 5 28 1 4
+end
+
+# Host 12
+!respawn 200 206
+!!copy 11 20 28 1 19
+end
+
+# Host 7
+!respawn 107 297
+!!copy 11 14 28 1 13
+end
+
+# Host 6
+!respawn 96 222
+!!copy 11 14 28 1 13
+end
+
+# Host 4
+!respawn 23 214
+goto 50 222
+!!copy 11 14 28 1 13
+end
+
+# Host 5
+!respawn 49 264
+goto 51 228
+!!copy 11 14 28 1 13
+end
+
+# Host 15
+!respawn 260 260
+!!copy 11 16 28 1 15
+end
+
+# Host 14
+!respawn 279 214
+goto 258 258
+!!copy 11 16 28 1 15
+end
+
+# Host 13
+!respawn 215 278
+goto 258 258
+!!copy 11 16 28 1 15
+end
+
+# Host 8
+!respawn 214 22
+!!copy 11 21 28 1 20
+end
+
+# Host 9
+!respawn 220 97
+!!copy 11 21 28 1 20
+end
+
+# Host 11
+!respawn 297 108
+!!copy 11 21 28 1 20
+end
+
+# Host 10
+!respawn 264 50
+!!copy 11 21 28 1 20
+end

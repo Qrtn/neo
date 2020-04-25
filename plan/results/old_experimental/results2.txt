@@ -1,0 +1,80 @@
+map seed: 0
+puzzle seed: 0
+
+cycles: 10000000
+Lab Grade: 20
+Scores: 196 137
+========================================
+winner: spimbot.s
+map seed: 1
+puzzle seed: 1
+
+cycles: 10000000
+Lab Grade: 70
+Scores: 266 36
+========================================
+winner: spimbot.s
+map seed: 2
+puzzle seed: 2
+
+cycles: 10000000
+Lab Grade: 43
+Scores: 204 80
+========================================
+winner: spimbot.s
+map seed: 3
+puzzle seed: 3
+
+cycles: 10000000
+Lab Grade: 28
+Scores: 144 63
+========================================
+winner: spimbot.s
+map seed: 4
+puzzle seed: 4
+
+cycles: 10000000
+Lab Grade: 3
+Scores: 146 136
+========================================
+winner: spimbot.s
+map seed: 5
+puzzle seed: 5
+
+cycles: 10000000
+Lab Grade: 24
+Scores: 176 106
+========================================
+winner: spimbot.s
+map seed: 5
+puzzle seed: 5
+
+cycles: 10000000
+Lab Grade: 42
+Scores: 219 97
+========================================
+winner: spimbot.s
+map seed: 901239012
+puzzle seed: 1290
+
+cycles: 10000000
+Lab Grade: 70
+Scores: 312 96
+========================================
+winner: spimbot.s
+map seed: 1290
+puzzle seed: 1291
+
+cycles: 10000000
+Lab Grade: 70
+Scores: 388 58
+========================================
+winner: spimbot.s
+map seed: 1290
+puzzle seed: 1291
+
+cycles: 10000000
+Lab Grade: 47
+Scores: 316 179
+========================================
+winner: spimbot.s

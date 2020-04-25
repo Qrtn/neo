@@ -1,0 +1,4 @@
+delay 1000000
+goto 60 60
+chkshoot 61 61
+end
