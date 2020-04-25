@@ -5,7 +5,7 @@ import os
 import itertools
 
 from puzzle_dim import PuzzleDimension, dimensions, encode_puzzle_dim, \
-    puzzle_dim_bits_to_dim_id
+    puzzle_dim_bits_to_dim_id, dim_id
 import solve
 
 scripts_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -43,7 +43,7 @@ def decode_row(puzzle_dim, row_bits):
     return row
 
 def encode_puzzle_row(puzzle_dim, bottom_row):
-    dim_id_bits = puzzle_dim.dim_id << ENCODED_ROW_WIDTH
+    dim_id_bits = dim_id[puzzle_dim] << ENCODED_ROW_WIDTH
     bottom_row_bits = encode_row(puzzle_dim, bottom_row)
 
     return dim_id_bits + bottom_row_bits

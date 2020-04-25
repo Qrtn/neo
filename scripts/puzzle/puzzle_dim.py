@@ -7,14 +7,14 @@ puzzle_dir = os.path.dirname(__file__)
 puzzle_dim_txt = os.path.join(puzzle_dir, 'puzzle_dimensions.txt')
 
 PuzzleDimension = namedtuple('PuzzleDimension', ['num_rows', 'num_cols',
-    'num_colors', 'weight', 'dim_id'], defaults=[None, None])       # weight is not necessary
+    'num_colors'])
 
 dimensions = []
 
 with open(puzzle_dim_txt) as f:
-    for line_no, line in enumerate(f):
+    for line in f:
         values = [int(i) for i in line.split()]
-        dim = PuzzleDimension(*values, line_no)
+        dim = PuzzleDimension(*values[:-1]) # Don't include weight
         dimensions.append(dim)
 
 def encode_puzzle_dim(dim):
@@ -24,8 +24,11 @@ def encode_puzzle_dim(dim):
 
     return color_bits + col_bits + row_bits
 
+dim_id = {}
 puzzle_dim_bits_to_dim_id = []
 
-for dim in dimensions:
+for i, dim in enumerate(dimensions):
+    dim_id[dim] = i
+
     puzzle_dim_bits = encode_puzzle_dim(dim)
-    puzzle_dim_bits_to_dim_id.append((puzzle_dim_bits, dim.dim_id))
+    puzzle_dim_bits_to_dim_id.append((puzzle_dim_bits, i))
