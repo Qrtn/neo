@@ -49,8 +49,8 @@ def encode_puzzle_row(puzzle_dim, bottom_row):
     return dim_id_bits + bottom_row_bits
 
 def generate_bottom_rows(puzzle_dim):
-    return itertools.product(range(puzzle_dim.num_colors),
-        repeat=puzzle_dim.num_cols)
+    return (list(br) for br in itertools.product(range(puzzle_dim.num_colors),
+        repeat=puzzle_dim.num_cols))
 
 def generate_top_rows(puzzle_dim):
     top_rows = []
