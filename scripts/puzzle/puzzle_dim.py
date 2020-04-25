@@ -1,16 +1,21 @@
 #!/usr/bin/python3
 
+import os.path
 from collections import namedtuple
+
+puzzle_dir = os.path.dirname(__file__)
+puzzle_dim_txt = os.path.join(puzzle_dir, 'puzzle_dimensions.txt')
 
 PuzzleDimension = namedtuple('PuzzleDimension', ['num_rows', 'num_cols',
     'num_colors', 'weight', 'dim_id'], defaults=[None, None])       # weight is not necessary
 
 dimensions = []
 
-for line_no, line in enumerate(open('puzzle_dimensions.txt')):
-    values = [int(i) for i in line.split()]
-    dim = PuzzleDimension(*values, line_no)
-    dimensions.append(dim)
+with open(puzzle_dim_txt) as f:
+    for line_no, line in enumerate(f):
+        values = [int(i) for i in line.split()]
+        dim = PuzzleDimension(*values, line_no)
+        dimensions.append(dim)
 
 def encode_puzzle_dim(dim):
     color_bits = dim.num_colors - 2

@@ -80,7 +80,12 @@ def generate_puzzle_lookup(puzzle_dims=dimensions):
     return lookup_table
 
 def list_tuples_to_array(d):
-    size = max(i[0] for i in d) + 1
+    keys = {i[0] for i in d}
+
+    if len(keys) != len(d):
+        raise KeyError("duplicate keys in list of tuples")
+
+    size = max(keys) + 1
 
     arr = [0] * size
     for key, val in d:
