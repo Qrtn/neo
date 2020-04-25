@@ -6,6 +6,7 @@ import itertools
 
 from puzzle_dim import PuzzleDimension, dimensions, encode_puzzle_dim, \
     puzzle_dim_bits_to_dim_id, dim_id
+from puzzle_general import generate_all_rows
 import solve
 
 scripts_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -48,14 +49,10 @@ def encode_puzzle_row(puzzle_dim, bottom_row):
 
     return dim_id_bits + bottom_row_bits
 
-def generate_bottom_rows(puzzle_dim):
-    return (list(br) for br in itertools.product(range(puzzle_dim.num_colors),
-        repeat=puzzle_dim.num_cols))
-
 def generate_top_rows(puzzle_dim):
     top_rows = []
 
-    for bottom_row in generate_bottom_rows(puzzle_dim):
+    for bottom_row in generate_all_rows(puzzle_dim):
         try:
             top_row = solve.get_top_row(puzzle_dim, bottom_row)
         except solve.UnsolvablePuzzle:

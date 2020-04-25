@@ -1,3 +1,4 @@
+import itertools
 import copy
 
 CROSS_DXY = [
@@ -7,6 +8,13 @@ CROSS_DXY = [
     (0, -1),
     (0, 1)
 ]
+
+def get_blank_board(puzzle_dim):
+    return [[0] * puzzle_dim.num_cols for i in range(puzzle_dim.num_rows)]
+
+def generate_all_rows(puzzle_dim):
+    return (list(br) for br in itertools.product(range(puzzle_dim.num_colors),
+        repeat=puzzle_dim.num_cols))
 
 def toggle_lights(puzzle_dim, board, row, col, times):
     if times % puzzle_dim.num_colors == 0:
@@ -41,7 +49,7 @@ def check_solution(puzzle_dim, board, solution):
     return True
 
 def chase_lights(puzzle_dim, board):
-    presses = [[0] * puzzle_dim.num_cols for i in range(puzzle_dim.num_rows)]
+    presses = get_blank_board(puzzle_dim)
 
     board = copy.deepcopy(board)
     for row_num, row in enumerate(board[:-1]):
