@@ -14,7 +14,7 @@ import os
 import math
 
 import replace_line
-from path.path_generator import HOST_INDEX_TO_TILE_COORDS
+from path.path_generator import HOST_INDEX_TO_POINTS
 
 class AssemblerError(RuntimeError):
     pass
@@ -219,11 +219,8 @@ class Lexer:
 
                         host_index = self.convert_respawn_coordinates(x, y)
 
-                    tile_coords = HOST_INDEX_TO_TILE_COORDS[host_index]
-
                     # New location is center of host
-                    real_x = tile_coords[0] * 8 + 4
-                    real_y = tile_coords[1] * 8 + 4
+                    real_x, real_y = HOST_INDEX_TO_POINTS[host_index]
 
                     self.compiler.set_internal_location(real_x, real_y)
                     respawn_pointers[host_index] = 4 * len(words)

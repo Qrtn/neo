@@ -74,4 +74,7 @@ def print_respawn_paths():
     for i, path in enumerate(respawn_paths):
         print(i, str(path[0]).ljust(8), path[1], goto_points[path[1]], sep='\t')
 
-print_respawn_paths()
+assert len(respawn_paths) == len(HOST_INDEX_TO_POINTS)
+
+if __name__ == '__main__':
+    print(generate(goto_points, udp_targets, respawn_paths), end='')
