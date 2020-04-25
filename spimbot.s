@@ -191,21 +191,21 @@ execute_until_delay:				# main instruction loop that hands control back to user 
 
 	add	$t0, $t0, 4			# increment instruction counter
 
-	li	$t9, DEBUG			# DEBUG on prints out current x, y on each cmd
-	beq	$t9, $zero, no_debug
+	#li	$t9, DEBUG			# DEBUG on prints out current x, y on each cmd
+	#beq	$t9, $zero, no_debug
 
-	li	$v0, PRINT_INT
-	lw	$a0, BOT_X
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li	$v0, PRINT_INT
-	lw	$a0, BOT_Y
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, '\n'
-	syscall
+	#li	$v0, PRINT_INT
+	#lw	$a0, BOT_X
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, ','
+	#syscall
+	#li	$v0, PRINT_INT
+	#lw	$a0, BOT_Y
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, '\n'
+	#syscall
 
 no_debug:
 	blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
@@ -240,30 +240,30 @@ execute_velocity:				# set velocity
 execute_udp:					# fire certain number of udp rounds (as set by hostcheck)
 	lw	$t9, fire_udp_rounds
 
-	li	$v0, PRINT_INT
-	lw	$a0, ANGLE
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li	$v0, PRINT_INT
-	lw	$a0, BOT_X
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li	$v0, PRINT_INT
-	lw	$a0, BOT_Y
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li	$v0, PRINT_INT
-	move	$a0, $t9
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, '\n'
-	syscall
+	#li	$v0, PRINT_INT
+	#lw	$a0, ANGLE
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, ','
+	#syscall
+	#li	$v0, PRINT_INT
+	#lw	$a0, BOT_X
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, ','
+	#syscall
+	#li	$v0, PRINT_INT
+	#lw	$a0, BOT_Y
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, ','
+	#syscall
+	#li	$v0, PRINT_INT
+	#move	$a0, $t9
+	#syscall
+	#li	$v0, PRINT_CHAR
+	#li	$a0, '\n'
+	#syscall
 
 udp_fire:
 	beq	$t9, $zero, udp_done
