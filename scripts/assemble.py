@@ -14,6 +14,7 @@ import os
 import math
 
 import replace_line
+from path.path_generator import HOST_INDEX_TO_TILE_COORDS
 
 class AssemblerError(RuntimeError):
     pass
@@ -131,29 +132,6 @@ class Compiler:
 
 
 class Lexer:
-    HOST_INDEX_TO_TILE_COORDS = {
-	# Top-left
-        0:  [7, 7],
-        1:  [5, 13],
-        2:  [13, 5],
-        3:  [14, 14],
-	# Bottom-left
-        4:  [2, 26],
-        5:  [6, 33],
-        6:  [12, 27],
-        7:  [13, 37],
-	# Top-right
-        8:  [26, 2],
-        9:  [27, 12],
-        10: [33, 6],
-        11: [37, 13],
-	# Bottom-right
-        12: [25, 25],
-        13: [26, 34],
-        14: [34, 26],
-        15: [32, 32],
-    }
-
     def __init__(self, compiler=Compiler):
         self.compiler = compiler()
 
@@ -241,7 +219,7 @@ class Lexer:
 
                         host_index = self.convert_respawn_coordinates(x, y)
 
-                    tile_coords = Lexer.HOST_INDEX_TO_TILE_COORDS[host_index]
+                    tile_coords = HOST_INDEX_TO_TILE_COORDS[host_index]
 
                     # New location is center of host
                     real_x = tile_coords[0] * 8 + 4

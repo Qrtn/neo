@@ -1,37 +1,7 @@
 #!/usr/bin/python3
 from pprint import pprint
 
-MAX_BOARD_XY = 319
-
-def reflect_points(points, rotational):
-    if rotational:
-        return [(MAX_BOARD_XY - p[0], MAX_BOARD_XY - p[1]) for p in points]
-    else:
-        return [(MAX_BOARD_XY - p[1], MAX_BOARD_XY - p[0]) for p in points]
-
-def combine_and_dedupe(left, right):
-    l = list(left)
-    r = list(right)
-
-    if l[-1] == r[0]:
-        l.pop(-1)
-
-    if r[-1] == l[0]:
-        r.pop(-1)
-
-    return l + r
-
-def complete_points(points, x_pos, dedupe=True):
-    reflected = reflect_points(points, x_pos)
-
-    if dedupe:
-        if points[-1] == reflected[0]:
-            reflected.pop(0)
-
-        if reflected[-1] == points[0]:
-            reflected.pop(-1)
-
-    return points + reflected
+from path_generator import *
 
 goto_points = [
     (59, 59),
