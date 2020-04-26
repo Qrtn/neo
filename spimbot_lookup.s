@@ -523,6 +523,7 @@ solve_encode_bottom_row_for:
 solve_encode_bottom_row_for_done:
 
 	# TODO: check if bottom_row_bits is 0, if so return
+	beq	$t4, $zero, solve_return
 
 solve_encode_puzzle:
 	sll	$t8, $t8, ENCODED_ROW_WIDTH	# puzzle_bits = dimension_id << 8
@@ -583,6 +584,7 @@ solve_apply_top_row_for_done:
 
 	jal	chase_lights
 
+solve_return:
 	lw	$ra, 0($sp)
 	lw	$s0, 4($sp) 
 	lw	$s1, 8($sp)
