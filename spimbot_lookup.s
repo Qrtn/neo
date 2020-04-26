@@ -497,6 +497,12 @@ solve_encode_bottom_row:
 
 	add	$t6, $t5, $t1			# end_index
 
+	#
+	li	$v0, PRINT_CHAR
+	li	$a0, 'B'
+	syscall
+	#
+
 solve_encode_bottom_row_for:
 	beq	$t5, $t6, solve_encode_bottom_row_for_done
 
@@ -531,10 +537,16 @@ solve_lookup_top_row_bits:
 	lhu	$s0, puzzle_table($t8)		# top_row_bits = puzzle_table[puzzle_bits]
 
 	li	$s2, 1				# cell_mask = 1
-	and	$s2, $s2, $s1			# cell_mask &= cell_bit_width
+	or	$s2, $s2, $s1			# cell_mask |= cell_bit_width
 						# (cell_mask = (cell_bit_width == 1) ? 0b1 : 0b11)
 
 	sub	$s3, $t1, 1			# col = num_cols - 1
+
+	#
+	li	$v0, PRINT_CHAR
+	li	$a0, 'T'
+	syscall
+	#
 
 solve_apply_top_row_for:
 	blt	$s3, 0, solve_apply_top_row_for_done
@@ -565,7 +577,7 @@ solve_apply_top_row_for:
 solve_apply_top_row_for_done:
 	#
 	li	$v0, PRINT_CHAR
-	li	$a0, 'E'
+	li	$a0, '\n'
 	syscall
 	#
 
