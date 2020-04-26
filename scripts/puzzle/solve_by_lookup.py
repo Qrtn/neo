@@ -2,12 +2,14 @@
 import copy
 from pprint import pprint
 
+from puzzle_dim import encode_puzzle_dim
+
 from puzzle_general import toggle_lights, chase_lights, check_solution, \
     toggle_row_lights, combine_boards, get_blank_board
 
 from generate_lookup import generate_puzzle_lookup_array, \
-    generate_dim_id_lookup_array, encode_puzzle_row, decode_row, \
-    generate_top_rows
+    generate_dim_id_lookup_array, decode_row, encode_row, \
+    ENCODED_ROW_WIDTH
 
 puzzle_table = generate_puzzle_lookup_array()
 dim_id_table = generate_dim_id_lookup_array()
@@ -20,7 +22,12 @@ def solve_by_lookup(puzzle_dim, board):
     board = get_blank_board(puzzle_dim)
     board[-1] = bottom_row
 
-    puzzle_bits = encode_puzzle_row(puzzle_dim, bottom_row)
+    puzzle_dim_bits = encode_puzzle_dim(puzzle_dim)
+    dim_id = dim_id_table[puzzle_dim_bits]
+
+    bottom_row_bits = encode_row(puzzle_dim, bottom_row)
+
+    puzzle_bits = (dim_id << ENCODED_ROW_WIDTH) + bottom_row_bits
 
     top_row_bits = puzzle_table[puzzle_bits]
     top_row = decode_row(puzzle_dim, top_row_bits)
