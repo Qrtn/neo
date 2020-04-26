@@ -20,7 +20,7 @@ TOP_ROW_DATATYPE = '.half'
 DIM_ID_DATATYPE = '.byte'
 
 def encode_row(puzzle_dim, row):
-    # Returns 12-bit wide int
+    # Returns 10-bit wide int
     cell_bit_width = 1 if puzzle_dim.num_colors == 2 else 2
     bits = 0
 
