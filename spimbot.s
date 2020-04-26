@@ -36,7 +36,7 @@ RESPAWN_ACK		= 0xffff00f0  ## Respawn
 
 # our constants
 MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
-SOLVE_SLOWDOWN_CYCLES = 70000
+SOLVE_SLOWDOWN_CYCLES = 0
 
 .data
 
