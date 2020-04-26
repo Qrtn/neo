@@ -19,7 +19,7 @@
 
 **Geometric accuracy:** Neo is built on the fundamental premise that it is possible to navigate to and shoot all 16 hosts on the map without deviating from a fixed path. This eliminates the need for scanning. Instead, Neo relies on a sequence of repeating instructions that set the bot's angle and velocity at precisely-timed intervals.
 
-**Economic efficiency:** Neo knows when to shoot and when not to shoot. By checking the arena map before attempting to capture a host, Neo can determine the exact number of UDP packets to send, depending on whether the host is neutral or hostile.
+**Economic efficiency:** Neo knows when to shoot and when not to shoot. By checking the arena map before attempting to capture a host, Neo can determine the exact number of UDP packets to send, depending on whether the host is neutral or hostile. Neo also features a highly optimized puzzle solver that operates at 12 times the speed of the default puzzle solver, removing the monetary bottleneck to capturing hosts.
 
 **Spatial awareness:** Whenever Neo is hit by an enemy UDP packet and reboots, he immediately identifies which host he has respawned at. Based on the host's location, Neo moves back into its designated path without missing a beat.
 
