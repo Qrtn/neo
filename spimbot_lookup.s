@@ -78,8 +78,7 @@ main:
 	sgt	$t1, $t0, 160				# true if starting on the right half of the map
 	sw	$t1, is_blue_bot			# Important for orientation of angle and movement
 
-	li	$t0, 1000				# Kick off kernel instruction loop after
-	sw	$t0, TIMER				# 1000 cycles
+	sw	$zero, TIMER				# Kick off kernel instruction loop immediately
 
 	# Puzzle solving
 	la	$s0, puzzle				# Puzzle address
