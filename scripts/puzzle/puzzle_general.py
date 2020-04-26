@@ -55,10 +55,24 @@ def chase_lights(puzzle_dim, board):
     for row_num, row in enumerate(board[:-1]):
         for col_num, state in enumerate(row):
             if state != 0:
-                presses[row_num + 1][col_num] = puzzle_dim.num_colors - state
+                times = puzzle_dim.num_colors - state
+                presses[row_num + 1][col_num] = times
 
-                toggle_lights(puzzle_dim, board, row_num + 1, col_num,
-                    puzzle_dim.num_colors - state)
+                toggle_lights(puzzle_dim, board, row_num + 1, col_num, times)
 
     bottom_row = board[-1]
     return presses, bottom_row
+
+def combine_boards(puzzle_dim, *boards):
+    board = get_blank_board(puzzle_dim)
+
+    for b in boards:
+        for i in range(puzzle_dim.num_rows):
+            for j in range(puzzle_dim.num_cols):
+                board[i][j] += b[i][j]
+
+    for i in range(puzzle_dim.num_rows):
+        for j in range(puzzle_dim.num_cols):
+            board[i][j] %= puzzle_dim.num_colors
+
+    return board
