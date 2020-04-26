@@ -123,6 +123,7 @@ main_check_puzzle_available:
 chunkIH:    .space 60
 non_intrpt_str:    .asciiz "Non-interrupt exception\n"
 unhandled_str:	  .asciiz "Unhandled interrupt type\n"
+
 .ktext 0x80000180
 interrupt_handler:
 .set noat
@@ -460,12 +461,12 @@ ENCODED_ROW_WIDTH = 10
 solve:
 # Precondition: solution is filled with zeroes
 # Remember to clear board inside the request loop so cycles aren't wasted
+	sub	$sp, $sp, 20
 	sw	$ra, 0($sp)
 	sw	$s0, 4($sp) 
 	sw	$s1, 8($sp)
 	sw	$s2, 12($sp)
 	sw	$s3, 16($sp)
-	sub	$sp, $sp, 20
 
 	jal	chase_lights
 
@@ -553,6 +554,7 @@ solve_apply_top_row_for_done:
 
 .globl chase_lights
 chase_lights:
+	sub	$sp, $sp, 28
 	sw	$ra, 0($sp)
 	sw	$s0, 4($sp) 
 	sw	$s1, 8($sp)
@@ -560,7 +562,6 @@ chase_lights:
 	sw	$s3, 16($sp)
 	sw	$s4, 20($sp)
 	sw	$s5, 24($sp)
-	sub	$sp, $sp, 28
 
 	lw	$s0, num_rows
 	lw	$s1, num_cols
