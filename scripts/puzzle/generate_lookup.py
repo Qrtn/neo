@@ -8,6 +8,7 @@ from puzzle_dim import PuzzleDimension, dimensions, encode_puzzle_dim, \
     puzzle_dim_bits_to_dim_id, dim_id
 from puzzle_general import generate_all_rows
 import solve
+import generate_top_row
 
 scripts_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(scripts_dir)
@@ -37,7 +38,7 @@ def decode_row(puzzle_dim, row_bits):
 
     for bit in range(puzzle_dim.num_cols):
         state = row_bits & cell_mask
-        row[-(bit + 1)] = state
+        row[puzzle_dim.num_cols - 1 - bit] = state
 
         row_bits >>= cell_bit_width
 
@@ -49,13 +50,16 @@ def encode_puzzle_row(puzzle_dim, bottom_row):
 
     return dim_id_bits + bottom_row_bits
 
-def generate_top_rows(puzzle_dim):
+def generate_top_rows(puzzle_dim, cpp_get_top_row=False):
     top_rows = []
+
+    get_top_row = solve.get_top_row if cpp_get_top_row else \
+        generate_top_row.get_top_row
 
     for bottom_row in generate_all_rows(puzzle_dim):
         try:
-            top_row = solve.get_top_row(puzzle_dim, bottom_row)
-        except solve.UnsolvablePuzzle:
+            top_row = get_top_row(puzzle_dim, bottom_row)
+        except (solve.UnsolvablePuzzle, IndexError):
             continue
 
         top_rows.append((bottom_row, top_row))
@@ -69,7 +73,7 @@ def generate_puzzle_lookup(puzzle_dims=dimensions):
         lookup_by_bottom_row = generate_top_rows(dim)
 
         for bottom_row, top_row in lookup_by_bottom_row:
-            top_row_bits = encode_row(dim, bottom_row)
+            top_row_bits = encode_row(dim, top_row)
             full_puzzle_bits = encode_puzzle_row(dim, bottom_row)
 
             lookup_table.append((full_puzzle_bits, top_row_bits))
