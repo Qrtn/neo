@@ -202,22 +202,6 @@ execute_until_delay:				# main instruction loop that hands control back to user 
 
 	add	$t0, $t0, 4			# increment instruction counter
 
-	#li	$t9, DEBUG			# DEBUG on prints out current x, y on each cmd
-	#beq	$t9, $zero, no_debug
-
-	#li	$v0, PRINT_INT
-	#lw	$a0, BOT_X
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, ','
-	#syscall
-	#li	$v0, PRINT_INT
-	#lw	$a0, BOT_Y
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, '\n'
-	#syscall
-
 no_debug:
 	blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
 	blt	$t1, 2000, execute_velocity	# depending on range of instruction (think of it like a weird
@@ -250,31 +234,6 @@ execute_velocity:				# set velocity
 # INSTRUCTION
 execute_udp:					# fire certain number of udp rounds (as set by hostcheck)
 	lw	$t9, fire_udp_rounds
-
-	#li	$v0, PRINT_INT
-	#lw	$a0, ANGLE
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, ','
-	#syscall
-	#li	$v0, PRINT_INT
-	#lw	$a0, BOT_X
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, ','
-	#syscall
-	#li	$v0, PRINT_INT
-	#lw	$a0, BOT_Y
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, ','
-	#syscall
-	#li	$v0, PRINT_INT
-	#move	$a0, $t9
-	#syscall
-	#li	$v0, PRINT_CHAR
-	#li	$a0, '\n'
-	#syscall
 
 udp_fire:
 	beq	$t9, $zero, udp_done
@@ -497,25 +456,12 @@ solve_encode_bottom_row:
 
 	add	$t6, $t5, $t1			# end_index
 
-	#
-	li	$v0, PRINT_CHAR
-	li	$a0, 'B'
-	syscall
-	#
-
 solve_encode_bottom_row_for:
 	beq	$t5, $t6, solve_encode_bottom_row_for_done
 
 	sll	$t4, $t4, $s1			# bottom_row_bits <<= cell_bit_width
 	lbu	$t7, puzzle_board($t5)		# state = puzzle_board[index]
 	add	$t4, $t4, $t7			# bottom_row_bits += state
-
-	li	$v0, PRINT_INT
-	move	$a0, $t7
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
 
 	add	$t5, $t5, 1			# ++index
 	j	solve_encode_bottom_row_for
@@ -530,10 +476,6 @@ solve_encode_puzzle:
 	add	$t8, $t8, $t4			# puzzle_bits += bottom_row_bits
 	sll	$t8, $t8, 1			# puzzle_bits *= 2 (convert to short index)
 
-	li	$v0, PRINT_CHAR
-	li	$a0, '\n'
-	syscall
-
 solve_lookup_top_row_bits:
 	lhu	$s0, puzzle_table($t8)		# top_row_bits = puzzle_table[puzzle_bits]
 
@@ -543,28 +485,12 @@ solve_lookup_top_row_bits:
 
 	sub	$s3, $t1, 1			# col = num_cols - 1
 
-	#
-	li	$v0, PRINT_CHAR
-	li	$a0, 'T'
-	syscall
-	#
-
 solve_apply_top_row_for:
 	blt	$s3, 0, solve_apply_top_row_for_done
 
 	li	$a0, 0				# arg 0: row = 0
 	move	$a1, $s3			# arg 1: col
 	and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
-
-	#
-	li	$v0, PRINT_INT
-	move	$a0, $a2
-	syscall
-	li	$v0, PRINT_CHAR
-	li	$a0, ','
-	syscall
-	li	$a0, 0
-	#
 
 	sb	$a2, solution($s3)		# solution[col] = action_num
 
@@ -576,12 +502,6 @@ solve_apply_top_row_for:
 	j	solve_apply_top_row_for
 
 solve_apply_top_row_for_done:
-	#
-	li	$v0, PRINT_CHAR
-	li	$a0, '\n'
-	syscall
-	#
-
 	jal	chase_lights
 
 solve_return:
