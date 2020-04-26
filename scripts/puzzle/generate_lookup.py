@@ -16,7 +16,7 @@ import replace_line
 
 
 ENCODED_ROW_WIDTH = 10
-TOP_ROW_DATATYPE = '.short'
+TOP_ROW_DATATYPE = '.half'
 DIM_ID_DATATYPE = '.byte'
 
 def encode_row(puzzle_dim, row):
@@ -134,8 +134,8 @@ generate_lookup.py -h
             try:
                 asm_filename = sys.argv[3]
             except IndexError:
-                scripts_dir = os.path.dirname(__file__)
-                asm_filename = os.path.normpath(os.path.join(scripts_dir, '..', 'spimbot.s'))
+                asm_filename = os.path.normpath(os.path.join(scripts_dir, '..',
+                    'spimbot.s'))
 
             if not os.path.exists(asm_filename):
                 print('No such file', asm_filename)
@@ -152,4 +152,4 @@ generate_lookup.py -h
         print(dim_id_data)
     else:
         replace_line.replace_in_file(asm_filename, 'puzzle_table:', puzzle_data + '\n')
-        replace_line.replace_in_file(asm_filename, 'dim_table:', dim_id_data + '\n')
+        replace_line.replace_in_file(asm_filename, 'dim_id_table:', dim_id_data + '\n')
