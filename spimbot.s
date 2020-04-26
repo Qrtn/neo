@@ -35,6 +35,7 @@ RESPAWN_INT_MASK	= 0x2000      ## Respawn
 RESPAWN_ACK		= 0xffff00f0  ## Respawn
 
 # our constants
+MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
 
 .data
 
@@ -90,7 +91,8 @@ main_reset_solution:
 	li	$t0, 0					# i = 0
 
 main_reset_solution_for:
-	beq	$t0, 256, main_reset_solution_for_done	# TODO: CHANGE TO 65
+	# Minimal possible size (not 256) to avoid spending too much time clearing solution
+	beq	$t0, MAX_SOLUTION_SIZE, main_reset_solution_for_done
 
 	sb	$zero, solution($t0)			# solution[i] = 0
 
@@ -373,7 +375,7 @@ done:
 
 	# Restore coprocessor1 registers!
 	# If you don't do this and you decide to use division or multiplication
-	#   in your main code, and interrupt handler code, you get WEIRD bugs.
+	#  in your main code, and interrupt handler code, you get WEIRD bugs.
 	lw	$t0, 48($k0)
 	mthi	$t0
 	lw	$t0, 52($k0)
@@ -393,7 +395,7 @@ done:
 	lw	$t9, 44($k0)
 
 .set noat
-	move	$at, $k1		# Restore $at
+	move	$at, $k1			# Restore $at
 .set at
 	eret
 
