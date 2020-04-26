@@ -119,7 +119,7 @@ def generate(goto_points, udp_targets, respawn_paths):
             section_copy = '!!copy {} {} {}'.format(COPY_TIMES,
                 start_of_main, end_of_main)
 
-        section_lines.append(section_copy)
+        section_lines += [section_copy, 'end']
 
         lines += section_lines
 
