@@ -35,7 +35,6 @@ RESPAWN_INT_MASK	= 0x2000      ## Respawn
 RESPAWN_ACK		= 0xffff00f0  ## Respawn
 
 # our constants
-DEBUG = 0
 
 .data
 
