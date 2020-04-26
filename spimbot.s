@@ -36,6 +36,7 @@ RESPAWN_ACK		= 0xffff00f0  ## Respawn
 
 # our constants
 MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
+SOLVE_SLOWDOWN_CYCLES = 1000
 
 .data
 
@@ -113,16 +114,16 @@ main_check_puzzle_available:
 	sw	$zero, has_puzzle			# Reset has_puzzle
 
 	j	main_request_puzzle			# User-space code requests and solves puzzles forever
-							# (Kernel code does the moving)
+							# (Kernel code does the movement)
 	jr	$ra
 
 ###############
 # Kernel code #
 ###############
 .kdata
-chunkIH:    .space 60
-non_intrpt_str:    .asciiz "Non-interrupt exception\n"
-unhandled_str:	  .asciiz "Unhandled interrupt type\n"
+chunkIH: .space 60
+non_intrpt_str: .asciiz "Non-interrupt exception\n"
+unhandled_str:  .asciiz "Unhandled interrupt type\n"
 
 .ktext 0x80000180
 interrupt_handler:
@@ -170,17 +171,10 @@ interrupt_dispatch:				# Interrupt:
 	and	$a0, $k0, RESPAWN_INT_MASK
 	bne	$a0, 0, respawn_interrupt
 
-	and	$a0, $k0, BONK_INT_MASK		# is there a bonk interrupt?
-	bne	$a0, 0, bonk_interrupt		# Bonk interrupt currently unused
-
 	li	$v0, PRINT_STRING		# Unhandled interrupt types
 	la	$a0, unhandled_str
 	syscall
 	j	done
-
-bonk_interrupt:
-	sw	$0, BONK_ACK
-	j	interrupt_dispatch		# see if other interrupts are waiting
 
 ### Movement Pattern
 # -360 to 360		absolute angle
@@ -308,7 +302,7 @@ return_end:
 	j	interrupt_dispatch		# see if other interrupts are waiting
 
 request_puzzle_interrupt:
-	sw	$0, REQUEST_PUZZLE_ACK
+	sw	$zero, REQUEST_PUZZLE_ACK
 
 	# Write true to M[has_puzzle]
 	la	$t0, has_puzzle
@@ -323,7 +317,7 @@ respawn_interrupt:
 	sw	$zero, TIMER_ACK
 
 	# Acknowledge respawn. This puts the bot back into play
-	sw	$0, RESPAWN_ACK
+	sw	$zero, RESPAWN_ACK
 
 	lw	$t8, BOT_X			# get current location
 	lw	$t9, BOT_Y			# more details on host mapping in scripts/host_mapping.md
@@ -427,6 +421,12 @@ solve:
 	sw	$s2, 12($sp)
 	sw	$s3, 16($sp)
 
+# 	lw	$t0, SOLVE_SLOWDOWN_CYCLES	# For artifically throttling the solver's speed
+# solve_slowdown:
+# 	sub	$t0, $t0, 1
+# 	beq	$t0, $zero, solve_slowdown_done
+# solve_slowdown_done:
+
 	jal	chase_lights
 
 solve_encode_puzzle_dim:
@@ -454,22 +454,19 @@ solve_encode_bottom_row:
 	sub	$t5, $t0, 1			# index (last row's index) = num_rows - 1
 	mul	$t5, $t5, $t1			# index *= num_cols
 
-	add	$t6, $t5, $t1			# end_index
+	add	$t6, $t5, $t1			# end_index = index + num_cols
 
 solve_encode_bottom_row_for:
-	beq	$t5, $t6, solve_encode_bottom_row_for_done
-
 	sll	$t4, $t4, $s1			# bottom_row_bits <<= cell_bit_width
 	lbu	$t7, puzzle_board($t5)		# state = puzzle_board[index]
 	add	$t4, $t4, $t7			# bottom_row_bits += state
 
 	add	$t5, $t5, 1			# ++index
-	j	solve_encode_bottom_row_for
+
+	bne	$t5, $t6, solve_encode_bottom_row_for
 
 solve_encode_bottom_row_for_done:
-
-	# TODO: check if bottom_row_bits is 0, if so return
-	beq	$t4, $zero, solve_return
+	beq	$t4, $zero, solve_return	# check if bottom_row_bits is 0, if so return
 
 solve_encode_puzzle:
 	sll	$t8, $t8, ENCODED_ROW_WIDTH	# puzzle_bits = dimension_id << 8
@@ -486,8 +483,6 @@ solve_lookup_top_row_bits:
 	sub	$s3, $t1, 1			# col = num_cols - 1
 
 solve_apply_top_row_for:
-	blt	$s3, 0, solve_apply_top_row_for_done
-
 	li	$a0, 0				# arg 0: row = 0
 	move	$a1, $s3			# arg 1: col
 	and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
@@ -499,7 +494,8 @@ solve_apply_top_row_for:
 	srl	$s0, $s0, $s1			# top_row_bits >>= cell_bit_width
 
 	sub	$s3, $s3, 1			# --col
-	j	solve_apply_top_row_for
+
+	bgez	$s3, solve_apply_top_row_for
 
 solve_apply_top_row_for_done:
 	jal	chase_lights
@@ -534,13 +530,13 @@ chase_lights:
 
 	li	$s3, 1					# row = 1
 chase_lights_row_for:
-	beq	$s3, $s0, chase_lights_row_for_done	# while (row < num_rows)
+	# while (row < num_rows)
 
 	li	$s4, 0					# col = 0
 chase_lights_col_for:
-	beq	$s4, $s1, chase_lights_col_for_done	# while (col < num_cols)
+	# while (col < num_cols)
 
-	lbu	$t0, puzzle_board($s5)			# state = puzzle_board[index]
+	lbu	$t0, puzzle_board($s5)			# state = puzzle_board[puzzle_index]
 	beq	$t0, $zero, chase_lights_col_for_nolight# if (state == 0) skip toggle light
 
 	sub	$a2, $s2, $t0				# arg 2: actions = num_colors - state
@@ -559,11 +555,13 @@ chase_lights_col_for:
 chase_lights_col_for_nolight:
 	add	$s5, $s5, 1				# puzzle_index += 1
 	add	$s4, $s4, 1				# col += 1
-	j	chase_lights_col_for
+
+	bne	$s4, $s1, chase_lights_col_for
 
 chase_lights_col_for_done:
 	add	$s3, $s3, 1				# row += 1
-	j	chase_lights_row_for
+
+	bne	$s3, $s0, chase_lights_row_for
 
 chase_lights_row_for_done:
 	lw	$ra, 0($sp)
@@ -614,7 +612,7 @@ toggle_light:
 	sb	$t6, 0($t5)
 
 toggle_light_row_greater_if:
-	ble	$a0, $0, toggle_light_col_greater_if
+	blez	$a0, toggle_light_col_greater_if
 
 	# assign  $t5 = $t3&[($a0 - 1) * $t1 + $a1]
 	addi	$t5, $a0, -1
@@ -630,7 +628,7 @@ toggle_light_row_greater_if:
 	sb	$t6, 0($t5)
 
 toggle_light_col_greater_if:
-	ble	$a1, $0, toggle_light_row_less_if
+	blez	$a1, toggle_light_row_less_if
 
 	# assign  $t5 = $t3&[($a0) * $t1 + $a1 - 1]
 	mul	$t9, $a0, $t1
