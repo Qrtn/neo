@@ -478,7 +478,7 @@ solve_encode_puzzle_dim:
 	sub	$t3, $t0, 5			# row_bits = num_rows - 5
 	sll	$t3, $t3, 3			# row_bits <<= 3
 
-	sub	$t4, $t1, 3			# col_bits = num_cols - 4
+	sub	$t4, $t1, 4			# col_bits = num_cols - 4
 	sll	$t4, $t4, 1			# col_bits <<= 1
 
 	sub	$t5, $t2, 2			# color_bits = num_colors - 2
@@ -486,7 +486,7 @@ solve_encode_puzzle_dim:
 	add	$t6, $t3, $t4			# puzzle_dim_bits = row_bits + col_bits
 	add	$t6, $t6, $t5			# puzzle_dim_bits += color_bits
 
-	lw	$t8, dim_id_table($t6)		# dim_id = dim_id_table[puzzle_dim_bits]
+	lbu	$t8, dim_id_table($t6)		# dim_id = dim_id_table[puzzle_dim_bits]
 
 solve_encode_bottom_row:
 	sub	$s1, $t2, 1			# cell_bit_width = num_colors - 1
@@ -504,15 +504,28 @@ solve_encode_bottom_row_for:
 	lbu	$t7, puzzle_board($t5)		# state = puzzle_board[index]
 	add	$t4, $t4, $t7			# bottom_row_bits += state
 
+	li	$v0, PRINT_INT
+	move	$a0, $t7
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, ','
+	syscall
+
 	add	$t5, $t5, 1			# ++index
 	j	solve_encode_bottom_row_for
 
 solve_encode_bottom_row_for_done:
 
+	# TODO: check if bottom_row_bits is 0, if so return
+
 solve_encode_puzzle:
 	sll	$t8, $t8, ENCODED_ROW_WIDTH	# puzzle_bits = dimension_id << 8
 	add	$t8, $t8, $t4			# puzzle_bits += bottom_row_bits
 	sll	$t8, $t8, 1			# puzzle_bits *= 2 (convert to short index)
+
+	li	$v0, PRINT_CHAR
+	li	$a0, '\n'
+	syscall
 
 solve_lookup_top_row_bits:
 	lhu	$s0, puzzle_table($t8)		# top_row_bits = puzzle_table[puzzle_bits]
@@ -521,7 +534,7 @@ solve_lookup_top_row_bits:
 	and	$s2, $s2, $s1			# cell_mask &= cell_bit_width
 						# (cell_mask = (cell_bit_width == 1) ? 0b1 : 0b11)
 
-	sub	$s3, $t6, 1			# col = num_cols - 1
+	sub	$s3, $t1, 1			# col = num_cols - 1
 
 solve_apply_top_row_for:
 	blt	$s3, 0, solve_apply_top_row_for_done
@@ -529,6 +542,16 @@ solve_apply_top_row_for:
 	li	$a0, 0				# arg 0: row = 0
 	move	$a1, $s3			# arg 1: col
 	and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
+
+	#
+	li	$v0, PRINT_INT
+	move	$a0, $a2
+	syscall
+	li	$v0, PRINT_CHAR
+	li	$a0, ','
+	syscall
+	li	$a0, 0
+	#
 
 	sb	$a2, solution($s3)		# solution[col] = action_num
 
@@ -540,6 +563,12 @@ solve_apply_top_row_for:
 	j	solve_apply_top_row_for
 
 solve_apply_top_row_for_done:
+	#
+	li	$v0, PRINT_CHAR
+	li	$a0, 'E'
+	syscall
+	#
+
 	jal	chase_lights
 
 	lw	$ra, 0($sp)
@@ -563,46 +592,46 @@ chase_lights:
 	sw	$s4, 20($sp)
 	sw	$s5, 24($sp)
 
-	lw	$s0, num_rows
-	lw	$s1, num_cols
-	lw	$s2, num_colors
+	lw	$s0, num_rows				# load num_rows
+	lw	$s1, num_cols				# load num_cols
+	lw	$s2, num_colors				# load num_colors
 
-	sub	$s0, $s0, 1
+	li	$s5, 0					# puzzle_index = 0
 
-	move	$s5, $s1				# next row's index
+	li	$s3, 1					# row = 1
+chase_lights_row_for:
+	beq	$s3, $s0, chase_lights_row_for_done	# while (row < num_rows)
 
-chase_lights_row:
-	li	$s3, 0					# row
-	beq	$s3, $s0, chase_lights_row_done
+	li	$s4, 0					# col = 0
+chase_lights_col_for:
+	beq	$s4, $s1, chase_lights_col_for_done	# while (col < num_cols)
 
-chase_lights_col:
-	li	$s4, 0					# col
-	beq	$s4, $s1, chase_lights_col_done
+	lbu	$t0, puzzle_board($s5)			# state = puzzle_board[index]
+	beq	$t0, $zero, chase_lights_col_for_nolight# if (state == 0) skip toggle light
 
-	lbu	$a2, puzzle_board($s5)
-	beq	$a2, $zero, chase_lights_col_nolight
+	sub	$a2, $s2, $t0				# arg 2: actions = num_colors - state
 
-	sub	$a2, $s2, $a2				# times
+	add	$t1, $s5, $s1				# next_row_index = puzzle_index + num_cols
 
-	lbu	$t0, solution($s5)
-	add	$t0, $t0, $a2
-	#rem	$t0, $t0, $s2
-	sb	$t0, solution($s5)
+	lbu	$t2, solution($t1)			# prev_soln = solution[next_row_index]
+	add	$t2, $t2, $a2				# prev_soln += actions
+	#rem	$t2, $t2, $s2				# prev_soln %= num_colors (not necessary b/c soln still valid)
+	sb	$t2, solution($t1)			# solution[next_row_index] = prev_soln
 
-	move	$a0, $s3
-	move	$a1, $s4
-	jal	toggle_light
+	move	$a0, $s3				# arg 0: row
+	move	$a1, $s4				# arg 1: col
+	jal	toggle_light				# toggle_light(row, col, actions)
 
-chase_lights_col_nolight:
-	add	$s5, $s5, 1
-	add	$t4, $t4, 1
-	j	chase_lights_col
+chase_lights_col_for_nolight:
+	add	$s5, $s5, 1				# puzzle_index += 1
+	add	$s4, $s4, 1				# col += 1
+	j	chase_lights_col_for
 
-chase_lights_col_done:
-	add	$t3, $t3, 1
-	j	chase_lights_row
+chase_lights_col_for_done:
+	add	$s3, $s3, 1				# row += 1
+	j	chase_lights_row_for
 
-chase_lights_row_done:
+chase_lights_row_for_done:
 	lw	$ra, 0($sp)
 	lw	$s0, 4($sp) 
 	lw	$s1, 8($sp)
@@ -632,8 +661,6 @@ toggle_light:
     ##	  $a0 = row
     ##
 	## End aliases
-
-	move	$a2, $a3			# REMOVE AFTER REPLACING SOLVE!
 
 	lw	$t0, num_rows
 	lw	$t1, num_cols
