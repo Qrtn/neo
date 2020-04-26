@@ -36,7 +36,7 @@ RESPAWN_ACK		= 0xffff00f0  ## Respawn
 
 # our constants
 MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
-SOLVE_SLOWDOWN_CYCLES = 1000
+SOLVE_SLOWDOWN_CYCLES = 70000
 
 .data
 
@@ -68,11 +68,10 @@ is_blue_bot: .word 0
 .text
 main:
 	# Construct interrupt mask
-	li	$t4, 0
+	li	$t4, 1					# global enable bit
 	or	$t4, $t4, REQUEST_PUZZLE_INT_MASK	# puzzle interrupt bit
 	or	$t4, $t4, RESPAWN_INT_MASK		# respawn interrupt bit
 	or	$t4, $t4, TIMER_INT_MASK		# timer interrupt bit
-	or	$t4, $t4, 1				# global enable
 	mtc0	$t4, $12
 
 	# Setup code
@@ -92,19 +91,23 @@ main_reset_solution:
 	li	$t0, 0					# i = 0
 
 main_reset_solution_for:
-	# Minimal possible size (not 256) to avoid spending too much time clearing solution
-	beq	$t0, MAX_SOLUTION_SIZE, main_reset_solution_for_done
-
 	sb	$zero, solution($t0)			# solution[i] = 0
 
 	add	$t0, $t0, 1				# ++i
-	j	main_reset_solution_for
+
+	# Minimal possible size (not 256) to avoid spending too much time clearing solution
+	bne	$t0, MAX_SOLUTION_SIZE, main_reset_solution_for
 
 main_reset_solution_for_done:
 
 main_check_puzzle_available:
 	lw	$t0, has_puzzle				# Kernel writes to has_puzzle when puzzle is available
 	beq	$t0, $zero, main_check_puzzle_available	# has_puzzle used to communicate between kernel and user
+
+	li	$t9, SOLVE_SLOWDOWN_CYCLES		# ! For artifically throttling the solver's speed
+solve_slowdown:						# ! COMMENT lines with ! when releasing full version
+	sub	$t9, $t9, 2				# ! COMMENT
+	bgtz	$t9, solve_slowdown			# ! COMMENT
 
 	jal	solve					# Call solver
 
@@ -420,12 +423,6 @@ solve:
 	sw	$s1, 8($sp)
 	sw	$s2, 12($sp)
 	sw	$s3, 16($sp)
-
-# 	lw	$t0, SOLVE_SLOWDOWN_CYCLES	# For artifically throttling the solver's speed
-# solve_slowdown:
-# 	sub	$t0, $t0, 1
-# 	beq	$t0, $zero, solve_slowdown_done
-# solve_slowdown_done:
 
 	jal	chase_lights
 
