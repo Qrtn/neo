@@ -252,12 +252,12 @@ assemble.py <instruction_file>
 
 assemble.py <instruction_file> <output_file>
     Assembles movement: and respawn_pointers: data segments.
-    Outputs JSON to <output_file>.
+    Outputs JSON to output_file.
     """
 
     try:
         inst_filename = sys.argv[1]
-    except:
+    except IndexError:
         print(USAGE)
         sys.exit(1)
 
@@ -267,7 +267,7 @@ assemble.py <instruction_file> <output_file>
 
     try:
         output_filename = sys.argv[2]
-    except:
+    except IndexError:
         output_file = sys.stdout
     else:
         output_file = open(output_filename, 'w')
