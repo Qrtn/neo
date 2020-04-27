@@ -1,0 +1,425 @@
+        1 [0x00400000]	0x8fa40000  lw $4, 0($29)                   ; exceptions.s:183: lw $a0 0($sp)		# argc
+        1 [0x00400004]	0x27a50004  addiu $5, $29, 4                ; exceptions.s:184: addiu $a1 $sp 4		# argv
+        1 [0x00400008]	0x24a60004  addiu $6, $5, 4                 ; exceptions.s:185: addiu $a2 $a1 4		# envp
+        1 [0x0040000c]	0x00041080  sll $2, $4, 2                   ; exceptions.s:186: sll $v0 $a0 2
+        1 [0x00400010]	0x00c23021  addu $6, $6, $2                 ; exceptions.s:187: addu $a2 $a2 $v0
+        1 [0x00400014]	0x0c100009  jal 0x00400024 [main]           ; exceptions.s:188: jal main
+        0 [0x00400018]	0x00000000  nop                             ; exceptions.s:189: nop
+        0 [0x0040001c]	0x3402000a  ori $2, $0, 10                  ; exceptions.s:191: li $v0 10
+        0 [0x00400020]	0x0000000c  syscall                         ; exceptions.s:192: syscall			# syscall 10 (exit)
+        1 [0x00400024]	0x340c0001  ori $12, $0, 1                  ; spimbot.s:71: li	$t4, 1					# global enable bit
+        1 [0x00400028]	0x358c0800  ori $12, $12, 2048              ; spimbot.s:72: or	$t4, $t4, REQUEST_PUZZLE_INT_MASK	# puzzle interrupt bit
+        1 [0x0040002c]	0x358c2000  ori $12, $12, 8192              ; spimbot.s:73: or	$t4, $t4, RESPAWN_INT_MASK		# respawn interrupt bit
+        1 [0x00400030]	0x358c8000  ori $12, $12, -32768            ; spimbot.s:74: or	$t4, $t4, TIMER_INT_MASK		# timer interrupt bit
+        1 [0x00400034]	0x408c6000  mtc0 $12, $12                   ; spimbot.s:75: mtc0	$t4, $12
+        1 [0x00400038]	0x3c01ffff  lui $1, -1                      ; spimbot.s:78: lw	$t0, BOT_X				# Identify if red or blue bot via starting location
+        1 [0x0040003c]	0x8c280020  lw $8, 32($1)
+        1 [0x00400040]	0x340100a0  ori $1, $0, 160                 ; spimbot.s:79: sgt	$t1, $t0, 160				# true if starting on the right half of the map
+        1 [0x00400044]	0x0028482a  slt $9, $1, $8
+        1 [0x00400048]	0x3c011001  lui $1, 4097                    ; spimbot.s:80: sw	$t1, is_blue_bot			# Important for orientation of angle and movement
+        1 [0x0040004c]	0xac29064c  sw $9, 1612($1)
+        1 [0x00400050]	0x3c01ffff  lui $1, -1                      ; spimbot.s:82: sw	$zero, TIMER				# Kick off kernel instruction loop immediately
+        1 [0x00400054]	0xac20001c  sw $0, 28($1)
+        2 [0x00400058]	0x3c011001  lui $1, 4097 [puzzle]           ; spimbot.s:85: la	$s0, puzzle				# Puzzle address
+        1 [0x0040005c]	0x34300650  ori $16, $1, 1616 [puzzle]
+     1425 [0x00400060]	0x3c01ffff  lui $1, -1                      ; spimbot.s:88: sw	$s0, REQUEST_PUZZLE			# Request puzzle
+     1425 [0x00400064]	0xac3000d0  sw $16, 208($1)
+     1425 [0x00400068]	0x34080000  ori $8, $0, 0                   ; spimbot.s:91: li	$t0, 0					# i = 0
+    92625 [0x0040006c]	0x3c011001  lui $1, 4097 [solution]         ; spimbot.s:94: sb	$zero, solution($t0)			# solution[i] = 0
+    92627 [0x00400070]	0x00280821  addu $1, $1, $8
+    92626 [0x00400074]	0xa020075c  sb $0, 1884($1) [solution]
+    92626 [0x00400078]	0x21080001  addi $8, $8, 1                  ; spimbot.s:96: add	$t0, $t0, 1				# ++i
+    92626 [0x0040007c]	0x34010041  ori $1, $0, 65                  ; spimbot.s:99: bne	$t0, MAX_SOLUTION_SIZE, main_reset_solution_for
+    92628 [0x00400080]	0x1428fffb  bne $1, $8, -20 [main_reset_solution_for-0x00400080]
+  1202816 [0x00400084]	0x3c011001  lui $1, 4097                    ; spimbot.s:104: lw	$t0, has_puzzle				# Kernel writes to has_puzzle when puzzle is available
+  1202798 [0x00400088]	0x8c280004  lw $8, 4($1)
+  1202820 [0x0040008c]	0x1100fffe  beq $8, $0, -8 [main_check_puzzle_available-0x0040008c]; spimbot.s:105: beq	$t0, $zero, main_check_puzzle_available	# has_puzzle used to communicate between kernel and user
+     1424 [0x00400090]	0x0c10002d  jal 0x004000b4 [solve]          ; spimbot.s:112: jal	solve					# Call solver
+     1424 [0x00400094]	0x3c011001  lui $1, 4097 [solution]         ; spimbot.s:114: la	$t0, solution				# Submit solution
+     1424 [0x00400098]	0x3428075c  ori $8, $1, 1884 [solution]
+     1424 [0x0040009c]	0x3c01ffff  lui $1, -1                      ; spimbot.s:115: sw	$t0, SUBMIT_SOLUTION
+     1424 [0x004000a0]	0xac2800d4  sw $8, 212($1)
+     1424 [0x004000a4]	0x3c011001  lui $1, 4097                    ; spimbot.s:117: sw	$zero, has_puzzle			# Reset has_puzzle
+     1424 [0x004000a8]	0xac200004  sw $0, 4($1)
+     1424 [0x004000ac]	0x08100018  j 0x00400060 [main_request_puzzle]; spimbot.s:119: j	main_request_puzzle			# User-space code requests and solves puzzles forever
+        0 [0x004000b0]	0x03e00008  jr $31                          ; spimbot.s:121: jr	$ra
+     1424 [0x004000b4]	0x23bdffec  addi $29, $29, -20              ; spimbot.s:420: sub	$sp, $sp, 20
+     1424 [0x004000b8]	0xafbf0000  sw $31, 0($29)                  ; spimbot.s:421: sw	$ra, 0($sp)
+     1424 [0x004000bc]	0xafb00004  sw $16, 4($29)                  ; spimbot.s:422: sw	$s0, 4($sp) 
+     1424 [0x004000c0]	0xafb10008  sw $17, 8($29)                  ; spimbot.s:423: sw	$s1, 8($sp)
+     1424 [0x004000c4]	0xafb2000c  sw $18, 12($29)                 ; spimbot.s:424: sw	$s2, 12($sp)
+     1424 [0x004000c8]	0xafb30010  sw $19, 16($29)                 ; spimbot.s:425: sw	$s3, 16($sp)
+     1424 [0x004000cc]	0x0c10006c  jal 0x004001b0 [chase_lights]   ; spimbot.s:427: jal	chase_lights
+     1424 [0x004000d0]	0x3c011001  lui $1, 4097                    ; spimbot.s:430: lw	$t0, num_rows
+     1424 [0x004000d4]	0x8c280650  lw $8, 1616($1)
+     1424 [0x004000d8]	0x3c011001  lui $1, 4097                    ; spimbot.s:431: lw	$t1, num_cols
+     1424 [0x004000dc]	0x8c290654  lw $9, 1620($1)
+     1424 [0x004000e0]	0x3c011001  lui $1, 4097                    ; spimbot.s:432: lw	$t2, num_colors
+     1424 [0x004000e4]	0x8c2a0658  lw $10, 1624($1)
+     1424 [0x004000e8]	0x210bfffb  addi $11, $8, -5                ; spimbot.s:434: sub	$t3, $t0, 5			# row_bits = num_rows - 5
+     1424 [0x004000ec]	0x000b58c0  sll $11, $11, 3                 ; spimbot.s:435: sll	$t3, $t3, 3			# row_bits <<= 3
+     1424 [0x004000f0]	0x212cfffc  addi $12, $9, -4                ; spimbot.s:437: sub	$t4, $t1, 4			# col_bits = num_cols - 4
+     1424 [0x004000f4]	0x000c6040  sll $12, $12, 1                 ; spimbot.s:438: sll	$t4, $t4, 1			# col_bits <<= 1
+     1424 [0x004000f8]	0x214dfffe  addi $13, $10, -2               ; spimbot.s:440: sub	$t5, $t2, 2			# color_bits = num_colors - 2
+     1424 [0x004000fc]	0x016c7020  add $14, $11, $12               ; spimbot.s:442: add	$t6, $t3, $t4			# puzzle_dim_bits = row_bits + col_bits
+     1424 [0x00400100]	0x01cd7020  add $14, $14, $13               ; spimbot.s:443: add	$t6, $t6, $t5			# puzzle_dim_bits += color_bits
+     1425 [0x00400104]	0x3c011003  lui $1, 4099 [dim_id_table]     ; spimbot.s:445: lbu	$t8, dim_id_table($t6)		# dim_id = dim_id_table[puzzle_dim_bits]
+     1424 [0x00400108]	0x002e0821  addu $1, $1, $14
+     1424 [0x0040010c]	0x90383dd2  lbu $24, 15826($1) [dim_id_table]
+     1424 [0x00400110]	0x2151ffff  addi $17, $10, -1               ; spimbot.s:448: sub	$s1, $t2, 1			# cell_bit_width = num_colors - 1
+     1424 [0x00400114]	0x340c0000  ori $12, $0, 0                  ; spimbot.s:449: li	$t4, 0				# bottom_row_bits = 0 
+     1424 [0x00400118]	0x210dffff  addi $13, $8, -1                ; spimbot.s:451: sub	$t5, $t0, 1			# index (last row's index) = num_rows - 1
+     1424 [0x0040011c]	0x71a96802  mul $13, $13, $9                ; spimbot.s:452: mul	$t5, $t5, $t1			# index *= num_cols
+     1424 [0x00400120]	0x01a97020  add $14, $13, $9                ; spimbot.s:454: add	$t6, $t5, $t1			# end_index = index + num_cols
+     5737 [0x00400124]	0x022c6004  sllv $12, $12, $17              ; spimbot.s:457: sll	$t4, $t4, $s1			# bottom_row_bits <<= cell_bit_width
+     5737 [0x00400128]	0x3c011001  lui $1, 4097                    ; spimbot.s:458: lbu	$t7, puzzle_board($t5)		# state = puzzle_board[index]
+     5737 [0x0040012c]	0x002d0821  addu $1, $1, $13
+     5737 [0x00400130]	0x902f065c  lbu $15, 1628($1)
+     5737 [0x00400134]	0x018f6020  add $12, $12, $15               ; spimbot.s:459: add	$t4, $t4, $t7			# bottom_row_bits += state
+     5737 [0x00400138]	0x21ad0001  addi $13, $13, 1                ; spimbot.s:461: add	$t5, $t5, 1			# ++index
+     5737 [0x0040013c]	0x15aefffa  bne $13, $14, -24 [solve_encode_bottom_row_for-0x0040013c]; spimbot.s:463: bne	$t5, $t6, solve_encode_bottom_row_for
+     1424 [0x00400140]	0x11800015  beq $12, $0, 84 [solve_return-0x00400140]; spimbot.s:466: beq	$t4, $zero, solve_return	# check if bottom_row_bits is 0, if so return
+     1349 [0x00400144]	0x0018c280  sll $24, $24, 10                ; spimbot.s:469: sll	$t8, $t8, ENCODED_ROW_WIDTH	# puzzle_bits = dimension_id << 8
+     1349 [0x00400148]	0x030cc020  add $24, $24, $12               ; spimbot.s:470: add	$t8, $t8, $t4			# puzzle_bits += bottom_row_bits
+     1349 [0x0040014c]	0x0018c040  sll $24, $24, 1                 ; spimbot.s:471: sll	$t8, $t8, 1			# puzzle_bits *= 2 (convert to short index)
+     1350 [0x00400150]	0x3c011003  lui $1, 4099 [puzzle_table+65536 (0x00010000)]; spimbot.s:474: lhu	$s0, puzzle_table($t8)		# top_row_bits = puzzle_table[puzzle_bits]
+     1350 [0x00400154]	0x00380821  addu $1, $1, $24
+     1349 [0x00400158]	0x9430f09c  lhu $16, -3940($1) [puzzle_table]
+     1349 [0x0040015c]	0x34120001  ori $18, $0, 1                  ; spimbot.s:476: li	$s2, 1				# cell_mask = 1
+     1349 [0x00400160]	0x02519025  or $18, $18, $17                ; spimbot.s:477: or	$s2, $s2, $s1			# cell_mask |= cell_bit_width
+     1349 [0x00400164]	0x2133ffff  addi $19, $9, -1                ; spimbot.s:480: sub	$s3, $t1, 1			# col = num_cols - 1
+     5429 [0x00400168]	0x34040000  ori $4, $0, 0                   ; spimbot.s:483: li	$a0, 0				# arg 0: row = 0
+     5428 [0x0040016c]	0x00132821  addu $5, $0, $19                ; spimbot.s:484: move	$a1, $s3			# arg 1: col
+     5428 [0x00400170]	0x02123024  and $6, $16, $18                ; spimbot.s:485: and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
+     5428 [0x00400174]	0x3c011001  lui $1, 4097                    ; spimbot.s:487: sb	$a2, solution($s3)		# solution[col] = action_num
+     5428 [0x00400178]	0x00330821  addu $1, $1, $19
+     5428 [0x0040017c]	0xa026075c  sb $6, 1884($1)
+     5428 [0x00400180]	0x0c10009b  jal 0x0040026c [toggle_light]   ; spimbot.s:489: jal	toggle_light			# toggle_light(last_row, col, action_num)
+     5428 [0x00400184]	0x02308006  srlv $16, $16, $17              ; spimbot.s:491: srl	$s0, $s0, $s1			# top_row_bits >>= cell_bit_width
+     5429 [0x00400188]	0x2273ffff  addi $19, $19, -1               ; spimbot.s:493: sub	$s3, $s3, 1			# --col
+     5428 [0x0040018c]	0x0661fff7  bgez $19 -36 [solve_apply_top_row_for-0x0040018c]; spimbot.s:495: bgez	$s3, solve_apply_top_row_for
+     1349 [0x00400190]	0x0c10006c  jal 0x004001b0 [chase_lights]   ; spimbot.s:498: jal	chase_lights
+     1424 [0x00400194]	0x8fbf0000  lw $31, 0($29)                  ; spimbot.s:501: lw	$ra, 0($sp)
+     1424 [0x00400198]	0x8fb00004  lw $16, 4($29)                  ; spimbot.s:502: lw	$s0, 4($sp) 
+     1424 [0x0040019c]	0x8fb10008  lw $17, 8($29)                  ; spimbot.s:503: lw	$s1, 8($sp)
+     1424 [0x004001a0]	0x8fb2000c  lw $18, 12($29)                 ; spimbot.s:504: lw	$s2, 12($sp)
+     1424 [0x004001a4]	0x8fb30010  lw $19, 16($29)                 ; spimbot.s:505: lw	$s3, 16($sp)
+     1424 [0x004001a8]	0x23bd0014  addi $29, $29, 20               ; spimbot.s:506: add	$sp, $sp, 20
+     1424 [0x004001ac]	0x03e00008  jr $31                          ; spimbot.s:508: jr	$ra
+     2774 [0x004001b0]	0x23bdffe4  addi $29, $29, -28              ; spimbot.s:513: sub	$sp, $sp, 28
+     2773 [0x004001b4]	0xafbf0000  sw $31, 0($29)                  ; spimbot.s:514: sw	$ra, 0($sp)
+     2773 [0x004001b8]	0xafb00004  sw $16, 4($29)                  ; spimbot.s:515: sw	$s0, 4($sp) 
+     2773 [0x004001bc]	0xafb10008  sw $17, 8($29)                  ; spimbot.s:516: sw	$s1, 8($sp)
+     2773 [0x004001c0]	0xafb2000c  sw $18, 12($29)                 ; spimbot.s:517: sw	$s2, 12($sp)
+     2773 [0x004001c4]	0xafb30010  sw $19, 16($29)                 ; spimbot.s:518: sw	$s3, 16($sp)
+     2773 [0x004001c8]	0xafb40014  sw $20, 20($29)                 ; spimbot.s:519: sw	$s4, 20($sp)
+     2773 [0x004001cc]	0xafb50018  sw $21, 24($29)                 ; spimbot.s:520: sw	$s5, 24($sp)
+     2773 [0x004001d0]	0x3c011001  lui $1, 4097                    ; spimbot.s:522: lw	$s0, num_rows				# load num_rows
+     2773 [0x004001d4]	0x8c300650  lw $16, 1616($1)
+     2773 [0x004001d8]	0x3c011001  lui $1, 4097                    ; spimbot.s:523: lw	$s1, num_cols				# load num_cols
+     2773 [0x004001dc]	0x8c310654  lw $17, 1620($1)
+     2773 [0x004001e0]	0x3c011001  lui $1, 4097                    ; spimbot.s:524: lw	$s2, num_colors				# load num_colors
+     2773 [0x004001e4]	0x8c320658  lw $18, 1624($1)
+     2773 [0x004001e8]	0x34150000  ori $21, $0, 0                  ; spimbot.s:526: li	$s5, 0					# puzzle_index = 0
+     2773 [0x004001ec]	0x34130001  ori $19, $0, 1                  ; spimbot.s:528: li	$s3, 1					# row = 1
+    30143 [0x004001f0]	0x34140000  ori $20, $0, 0                  ; spimbot.s:532: li	$s4, 0					# col = 0
+   118860 [0x004001f4]	0x3c011001  lui $1, 4097                    ; spimbot.s:536: lbu	$t0, puzzle_board($s5)			# state = puzzle_board[puzzle_index]
+   118861 [0x004001f8]	0x00350821  addu $1, $1, $21
+   118859 [0x004001fc]	0x9028065c  lbu $8, 1628($1)
+   118861 [0x00400200]	0x1100000d  beq $8, $0, 52 [chase_lights_col_for_nolight-0x00400200]; spimbot.s:537: beq	$t0, $zero, chase_lights_col_for_nolight# if (state == 0) skip toggle light
+    63531 [0x00400204]	0x02483022  sub $6, $18, $8                 ; spimbot.s:539: sub	$a2, $s2, $t0				# arg 2: actions = num_colors - state
+    63531 [0x00400208]	0x02b14820  add $9, $21, $17                ; spimbot.s:541: add	$t1, $s5, $s1				# next_row_index = puzzle_index + num_cols
+    63531 [0x0040020c]	0x3c011001  lui $1, 4097                    ; spimbot.s:543: lbu	$t2, solution($t1)			# prev_soln = solution[next_row_index]
+    63530 [0x00400210]	0x00290821  addu $1, $1, $9
+    63530 [0x00400214]	0x902a075c  lbu $10, 1884($1)
+    63532 [0x00400218]	0x01465020  add $10, $10, $6                ; spimbot.s:544: add	$t2, $t2, $a2				# prev_soln += actions
+    63531 [0x0040021c]	0x3c011001  lui $1, 4097                    ; spimbot.s:546: sb	$t2, solution($t1)			# solution[next_row_index] = prev_soln
+    63530 [0x00400220]	0x00290821  addu $1, $1, $9
+    63530 [0x00400224]	0xa02a075c  sb $10, 1884($1)
+    63531 [0x00400228]	0x00132021  addu $4, $0, $19                ; spimbot.s:548: move	$a0, $s3				# arg 0: row
+    63530 [0x0040022c]	0x00142821  addu $5, $0, $20                ; spimbot.s:549: move	$a1, $s4				# arg 1: col
+    63532 [0x00400230]	0x0c10009b  jal 0x0040026c [toggle_light]   ; spimbot.s:550: jal	toggle_light				# toggle_light(row, col, actions)
+   118860 [0x00400234]	0x22b50001  addi $21, $21, 1                ; spimbot.s:553: add	$s5, $s5, 1				# puzzle_index += 1
+   118859 [0x00400238]	0x22940001  addi $20, $20, 1                ; spimbot.s:554: add	$s4, $s4, 1				# col += 1
+   118860 [0x0040023c]	0x1691ffee  bne $20, $17, -72 [chase_lights_col_for-0x0040023c]; spimbot.s:556: bne	$s4, $s1, chase_lights_col_for
+    30143 [0x00400240]	0x22730001  addi $19, $19, 1                ; spimbot.s:559: add	$s3, $s3, 1				# row += 1
+    30143 [0x00400244]	0x1670ffeb  bne $19, $16, -84 [chase_lights_row_for-0x00400244]; spimbot.s:561: bne	$s3, $s0, chase_lights_row_for
+     2773 [0x00400248]	0x8fbf0000  lw $31, 0($29)                  ; spimbot.s:564: lw	$ra, 0($sp)
+     2773 [0x0040024c]	0x8fb00004  lw $16, 4($29)                  ; spimbot.s:565: lw	$s0, 4($sp)
+     2773 [0x00400250]	0x8fb10008  lw $17, 8($29)                  ; spimbot.s:566: lw	$s1, 8($sp)
+     2773 [0x00400254]	0x8fb2000c  lw $18, 12($29)                 ; spimbot.s:567: lw	$s2, 12($sp)
+     2773 [0x00400258]	0x8fb30010  lw $19, 16($29)                 ; spimbot.s:568: lw	$s3, 16($sp)
+     2773 [0x0040025c]	0x8fb40014  lw $20, 20($29)                 ; spimbot.s:569: lw	$s4, 20($sp)
+     2773 [0x00400260]	0x8fb50018  lw $21, 24($29)                 ; spimbot.s:570: lw	$s5, 24($sp)
+     2773 [0x00400264]	0x23bd001c  addi $29, $29, 28               ; spimbot.s:571: add	$sp, $sp, 28
+     2773 [0x00400268]	0x03e00008  jr $31                          ; spimbot.s:573: jr	$ra
+    68959 [0x0040026c]	0x3c011001  lui $1, 4097                    ; spimbot.s:594: lw	$t0, num_rows
+    68960 [0x00400270]	0x8c280650  lw $8, 1616($1)
+    68959 [0x00400274]	0x3c011001  lui $1, 4097                    ; spimbot.s:595: lw	$t1, num_cols
+    68959 [0x00400278]	0x8c290654  lw $9, 1620($1)
+    68959 [0x0040027c]	0x3c011001  lui $1, 4097                    ; spimbot.s:596: lw	$t2, num_colors
+    68958 [0x00400280]	0x8c2a0658  lw $10, 1624($1)
+    68959 [0x00400284]	0x3c011001  lui $1, 4097 [puzzle_board]     ; spimbot.s:597: la	$t3, puzzle_board
+    68961 [0x00400288]	0x342b065c  ori $11, $1, 1628 [puzzle_board]
+    68960 [0x0040028c]	0x70896802  mul $13, $4, $9                 ; spimbot.s:600: mul	$t5, $a0, $t1
+    68958 [0x00400290]	0x01a56820  add $13, $13, $5                ; spimbot.s:601: add	$t5, $t5, $a1
+    68959 [0x00400294]	0x01ab6820  add $13, $13, $11               ; spimbot.s:602: add	$t5, $t5, $t3
+    68961 [0x00400298]	0x91ae0000  lbu $14, 0($13)                 ; spimbot.s:604: lbu	$t6, 0($t5)
+    68960 [0x0040029c]	0x01c67020  add $14, $14, $6                ; spimbot.s:605: add	$t6, $t6, $a2
+    68959 [0x004002a0]	0x01ca001a  div $14, $10                    ; spimbot.s:606: div	$t6, $t2
+    68960 [0x004002a4]	0x00007010  mfhi $14                        ; spimbot.s:607: mfhi	$t6
+    68959 [0x004002a8]	0xa1ae0000  sb $14, 0($13)                  ; spimbot.s:609: sb	$t6, 0($t5)
+    68960 [0x004002ac]	0x1880000a  blez $4 40 [toggle_light_col_greater_if-0x004002ac]; spimbot.s:612: blez	$a0, toggle_light_col_greater_if
+    63530 [0x004002b0]	0x208dffff  addi $13, $4, -1                ; spimbot.s:615: addi	$t5, $a0, -1
+    63531 [0x004002b4]	0x71a96802  mul $13, $13, $9                ; spimbot.s:616: mul	$t5, $t5, $t1
+    63530 [0x004002b8]	0x01a56820  add $13, $13, $5                ; spimbot.s:617: add	$t5, $t5, $a1
+    63530 [0x004002bc]	0x01ab6820  add $13, $13, $11               ; spimbot.s:618: add	$t5, $t5, $t3
+    63531 [0x004002c0]	0x91ae0000  lbu $14, 0($13)                 ; spimbot.s:620: lbu	$t6, 0($t5)
+    63533 [0x004002c4]	0x01c67020  add $14, $14, $6                ; spimbot.s:621: add	$t6, $t6, $a2
+    63530 [0x004002c8]	0x01ca001a  div $14, $10                    ; spimbot.s:622: div	$t6, $t2
+    63531 [0x004002cc]	0x00007010  mfhi $14                        ; spimbot.s:623: mfhi	$t6
+    63530 [0x004002d0]	0xa1ae0000  sb $14, 0($13)                  ; spimbot.s:625: sb	$t6, 0($t5)
+    68962 [0x004002d4]	0x18a0000a  blez $5 40 [toggle_light_row_less_if-0x004002d4]; spimbot.s:628: blez	$a1, toggle_light_row_less_if
+    50893 [0x004002d8]	0x7089c802  mul $25, $4, $9                 ; spimbot.s:631: mul	$t9, $a0, $t1
+    50891 [0x004002dc]	0x0325c820  add $25, $25, $5                ; spimbot.s:632: add	$t9, $t9, $a1
+    50892 [0x004002e0]	0x232dffff  addi $13, $25, -1               ; spimbot.s:633: addi	$t5, $t9, -1
+    50893 [0x004002e4]	0x01ab6820  add $13, $13, $11               ; spimbot.s:634: add	$t5, $t5, $t3
+    50891 [0x004002e8]	0x91ae0000  lbu $14, 0($13)                 ; spimbot.s:636: lbu	$t6, 0($t5)
+    50891 [0x004002ec]	0x01c67020  add $14, $14, $6                ; spimbot.s:637: add	$t6, $t6, $a2
+    50891 [0x004002f0]	0x01ca001a  div $14, $10                    ; spimbot.s:638: div	$t6, $t2
+    50892 [0x004002f4]	0x00007010  mfhi $14                        ; spimbot.s:639: mfhi	$t6
+    50893 [0x004002f8]	0xa1ae0000  sb $14, 0($13)                  ; spimbot.s:641: sb	$t6, 0($t5)
+    68958 [0x004002fc]	0x210cffff  addi $12, $8, -1                ; spimbot.s:645: addi	$t4, $t0, -1
+    68959 [0x00400300]	0x008c082a  slt $1, $4, $12                 ; spimbot.s:646: bge	$a0, $t4, toggle_light_col_less_if
+    68960 [0x00400304]	0x1020000a  beq $1, $0, 40 [toggle_light_col_less_if-0x00400304]
+    63030 [0x00400308]	0x208d0001  addi $13, $4, 1                 ; spimbot.s:649: addi	$t5, $a0, 1
+    63031 [0x0040030c]	0x71a96802  mul $13, $13, $9                ; spimbot.s:650: mul	$t5, $t5, $t1
+    63030 [0x00400310]	0x01a56820  add $13, $13, $5                ; spimbot.s:651: add	$t5, $t5, $a1
+    63029 [0x00400314]	0x01ab6820  add $13, $13, $11               ; spimbot.s:652: add	$t5, $t5, $t3
+    63031 [0x00400318]	0x91ae0000  lbu $14, 0($13)                 ; spimbot.s:654: lbu	$t6, 0($t5)
+    63032 [0x0040031c]	0x01c67020  add $14, $14, $6                ; spimbot.s:655: add	$t6, $t6, $a2
+    63031 [0x00400320]	0x01ca001a  div $14, $10                    ; spimbot.s:656: div	$t6, $t2
+    63030 [0x00400324]	0x00007010  mfhi $14                        ; spimbot.s:657: mfhi	$t6
+    63030 [0x00400328]	0xa1ae0000  sb $14, 0($13)                  ; spimbot.s:659: sb	$t6, 0($t5)
+    68960 [0x0040032c]	0x212cffff  addi $12, $9, -1                ; spimbot.s:663: addi	$t4, $t1, -1
+    68961 [0x00400330]	0x00ac082a  slt $1, $5, $12                 ; spimbot.s:664: bge	$a1, $t4, toggle_light_end
+    68959 [0x00400334]	0x1020000a  beq $1, $0, 40 [toggle_light_end-0x00400334]
+    51021 [0x00400338]	0x70896802  mul $13, $4, $9                 ; spimbot.s:667: mul	$t5, $a0, $t1
+    51023 [0x0040033c]	0x01a56820  add $13, $13, $5                ; spimbot.s:668: add	$t5, $t5, $a1
+    51022 [0x00400340]	0x21ad0001  addi $13, $13, 1                ; spimbot.s:669: addi	$t5, $t5, 1
+    51021 [0x00400344]	0x01ab6820  add $13, $13, $11               ; spimbot.s:670: 94 2000 4625 1
+    51021 [0x00400348]	0x91ae0000  lbu $14, 0($13)                 ; spimbot.s:672: lbu	$t6, 0($t5)
+    51021 [0x0040034c]	0x01c67020  add $14, $14, $6                ; spimbot.s:673: add	$t6, $t6, $a2
+    51021 [0x00400350]	0x01ca001a  div $14, $10                    ; spimbot.s:674: div	$t6, $t2
+    51022 [0x00400354]	0x00007010  mfhi $14                        ; spimbot.s:675: mfhi	$t6
+    51022 [0x00400358]	0xa1ae0000  sb $14, 0($13)                  ; spimbot.s:677: sb	$t6, 0($t5)
+    68958 [0x0040035c]	0x03e00008  jr $31                          ; spimbot.s:680: jr	$ra
+
+
+kernel text segment
+
+     1586 [0x80000180]	0x0001d821  addu $27, $0, $1                ; spimbot.s:134: move	$k1, $at			# Save $at
+     1586 [0x80000184]	0x3c019000  lui $1, -28672 [chunkIH]        ; spimbot.s:137: la	$k0, chunkIH
+     1586 [0x80000188]	0x343a0208  ori $26, $1, 520 [chunkIH]
+     1586 [0x8000018c]	0xaf440000  sw $4, 0($26)                   ; spimbot.s:138: sw	$a0, 0($k0)			# Get some free registers
+     1586 [0x80000190]	0xaf420004  sw $2, 4($26)                   ; spimbot.s:139: sw	$v0, 4($k0)			# by storing them to a global variable
+     1586 [0x80000194]	0xaf480008  sw $8, 8($26)                   ; spimbot.s:140: sw	$t0, 8($k0)
+     1586 [0x80000198]	0xaf49000c  sw $9, 12($26)                  ; spimbot.s:141: sw	$t1, 12($k0)
+     1586 [0x8000019c]	0xaf4a0010  sw $10, 16($26)                 ; spimbot.s:142: sw	$t2, 16($k0)
+     1586 [0x800001a0]	0xaf4b0014  sw $11, 20($26)                 ; spimbot.s:143: sw	$t3, 20($k0)
+     1586 [0x800001a4]	0xaf4c0018  sw $12, 24($26)                 ; spimbot.s:144: sw	$t4, 24($k0)
+     1586 [0x800001a8]	0xaf4d001c  sw $13, 28($26)                 ; spimbot.s:145: sw	$t5, 28($k0)
+     1586 [0x800001ac]	0xaf4e0020  sw $14, 32($26)                 ; spimbot.s:146: sw	$t6, 32($k0)
+     1586 [0x800001b0]	0xaf4f0024  sw $15, 36($26)                 ; spimbot.s:147: sw	$t7, 36($k0)
+     1586 [0x800001b4]	0xaf580028  sw $24, 40($26)                 ; spimbot.s:148: sw	$t8, 40($k0)
+     1586 [0x800001b8]	0xaf59002c  sw $25, 44($26)                 ; spimbot.s:149: sw	$t9, 44($k0)
+     1586 [0x800001bc]	0x00004010  mfhi $8                         ; spimbot.s:154: mfhi	$t0
+     1586 [0x800001c0]	0xaf480030  sw $8, 48($26)                  ; spimbot.s:155: sw	$t0, 48($k0)
+     1586 [0x800001c4]	0x00004012  mflo $8                         ; spimbot.s:156: mflo	$t0
+     1586 [0x800001c8]	0xaf480034  sw $8, 52($26)                  ; spimbot.s:157: sw	$t0, 52($k0)
+     1586 [0x800001cc]	0x401a6800  mfc0 $26, $13                   ; spimbot.s:159: mfc0	$k0, $13			# Get Cause register
+     1586 [0x800001d0]	0x001a2082  srl $4, $26, 2                  ; spimbot.s:160: srl	$a0, $k0, 2
+     1586 [0x800001d4]	0x3084000f  andi $4, $4, 15                 ; spimbot.s:161: and	$a0, $a0, 0xf			# ExcCode field
+     1586 [0x800001d8]	0x1404009f  bne $0, $4, 636 [non_intrpt-0x800001d8]; spimbot.s:162: bne	$a0, 0, non_intrpt
+     3172 [0x800001dc]	0x401a6800  mfc0 $26, $13                   ; spimbot.s:165: mfc0	$k0, $13			# Get Cause register, again
+     3172 [0x800001e0]	0x101a00a1  beq $0, $26, 644 [done-0x800001e0]; spimbot.s:166: beq	$k0, 0, done			# handled all outstanding interrupts
+     1586 [0x800001e4]	0x33448000  andi $4, $26, -32768            ; spimbot.s:168: and	$a0, $k0, TIMER_INT_MASK	# is there a timer interrupt?
+     1586 [0x800001e8]	0x1404000a  bne $0, $4, 40 [timer_interrupt-0x800001e8]; spimbot.s:169: bne	$a0, 0, timer_interrupt
+     1424 [0x800001ec]	0x33440800  andi $4, $26, 2048              ; spimbot.s:171: and	$a0, $k0, REQUEST_PUZZLE_INT_MASK
+     1424 [0x800001f0]	0x14040069  bne $0, $4, 420 [request_puzzle_interrupt-0x800001f0]; spimbot.s:172: bne	$a0, 0, request_puzzle_interrupt
+        0 [0x800001f4]	0x33442000  andi $4, $26, 8192              ; spimbot.s:174: and	$a0, $k0, RESPAWN_INT_MASK
+        0 [0x800001f8]	0x1404006e  bne $0, $4, 440 [respawn_interrupt-0x800001f8]; spimbot.s:175: bne	$a0, 0, respawn_interrupt
+        0 [0x800001fc]	0x34020004  ori $2, $0, 4                   ; spimbot.s:177: li	$v0, PRINT_STRING		# Unhandled interrupt types
+        0 [0x80000200]	0x3c019000  lui $1, -28672 [unhandled_str]  ; spimbot.s:178: la	$a0, unhandled_str
+        0 [0x80000204]	0x3424025d  ori $4, $1, 605 [unhandled_str]
+        0 [0x80000208]	0x0000000c  syscall                         ; spimbot.s:179: syscall
+        0 [0x8000020c]	0x08000119  j 0x00000464 [done]             ; spimbot.s:180: j	done
+      162 [0x80000210]	0x3c01ffff  lui $1, -1                      ; spimbot.s:192: sw	$zero, TIMER_ACK
+      162 [0x80000214]	0xac20006c  sw $0, 108($1)
+      162 [0x80000218]	0x3c011001  lui $1, 4097                    ; spimbot.s:194: lw	$t0, current_move		# load instruction counter
+      162 [0x8000021c]	0x8c280000  lw $8, 0($1)
+     1676 [0x80000220]	0x3c011001  lui $1, 4097 [movement]         ; spimbot.s:198: lw	$t1, movement($t0)		# load instruction
+     1676 [0x80000224]	0x00280821  addu $1, $1, $8
+     1676 [0x80000228]	0x8c29085c  lw $9, 2140($1) [movement]
+     1676 [0x8000022c]	0x21080004  addi $8, $8, 4                  ; spimbot.s:200: add	$t0, $t0, 4			# increment instruction counter
+     1676 [0x80000230]	0x292103e8  slti $1, $9, 1000               ; spimbot.s:203: blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
+     1676 [0x80000234]	0x14200011  bne $1, $0, 68 [execute_angle-0x80000234]
+     1171 [0x80000238]	0x292107d0  slti $1, $9, 2000               ; spimbot.s:204: blt	$t1, 2000, execute_velocity	# depending on range of instruction (think of it like a weird
+     1171 [0x8000023c]	0x14200019  bne $1, $0, 100 [execute_velocity-0x8000023c]
+      848 [0x80000240]	0x340107d0  ori $1, $0, 2000                ; spimbot.s:205: beq	$t1, 2000, execute_udp		# opcode that works with integer ranges instead of bits)
+      848 [0x80000244]	0x1029001b  beq $1, $9, 108 [execute_udp-0x80000244]
+      505 [0x80000248]	0x3c010098  lui $1, 152                     ; spimbot.s:206: blt	$t1, 10000000, execute_hostcheck
+      505 [0x8000024c]	0x34219680  ori $1, $1, -27008
+      505 [0x80000250]	0x0121082a  slt $1, $9, $1
+      505 [0x80000254]	0x14200021  bne $1, $0, 132 [execute_hostcheck-0x80000254]
+      162 [0x80000258]	0x3c010131  lui $1, 305                     ; spimbot.s:207: beq	$t1, 20000000, return_end
+      162 [0x8000025c]	0x34212d00  ori $1, $1, 11520
+      162 [0x80000260]	0x1029004a  beq $1, $9, 296 [return_end-0x80000260]
+      162 [0x80000264]	0x3c0105f5  lui $1, 1525                    ; spimbot.s:208: blt	$t1, 100000000, execute_jump
+      162 [0x80000268]	0x3421e100  ori $1, $1, -7936
+      162 [0x8000026c]	0x0121082a  slt $1, $9, $1
+      162 [0x80000270]	0x1420003a  bne $1, $0, 232 [execute_jump-0x80000270]
+      162 [0x80000274]	0x080000da  j 0x00000368 [return_delay]     ; spimbot.s:209: j	return_delay
+      505 [0x80000278]	0x3c011001  lui $1, 4097                    ; spimbot.s:213: lw	$t9, is_blue_bot		# orientation matters
+      505 [0x8000027c]	0x8c39064c  lw $25, 1612($1)
+      505 [0x80000280]	0x13200002  beq $25, $0, 8 [angle_write-0x80000280]; spimbot.s:214: beq	$t9, $zero, angle_write		# don't add 180 if starting top-left (red bot)
+        0 [0x80000284]	0x212900b4  addi $9, $9, 180                ; spimbot.s:216: add	$t1, $t1, 180			# fall-through to adding 180 for starting bottom-right (blue bot)
+      505 [0x80000288]	0x3c01ffff  lui $1, -1                      ; spimbot.s:220: sw	$t1, ANGLE
+      505 [0x8000028c]	0xac290014  sw $9, 20($1)
+      505 [0x80000290]	0x340a0001  ori $10, $0, 1                  ; spimbot.s:221: li	$t2, 1
+      505 [0x80000294]	0x3c01ffff  lui $1, -1                      ; spimbot.s:222: sw	$t2, ANGLE_CONTROL		# 1 = "absolute" angle control and store confirms and sets angle
+      505 [0x80000298]	0xac2a0018  sw $10, 24($1)
+      505 [0x8000029c]	0x08000088  j 0x00000220 [execute_until_delay]; spimbot.s:223: j	execute_until_delay
+      323 [0x800002a0]	0x212afa24  addi $10, $9, -1500             ; spimbot.s:227: sub	$t2, $t1, 1500			# subtract opcode offset
+      323 [0x800002a4]	0x3c01ffff  lui $1, -1                      ; spimbot.s:228: sw	$t2, VELOCITY
+      323 [0x800002a8]	0xac2a0010  sw $10, 16($1)
+      323 [0x800002ac]	0x08000088  j 0x00000220 [execute_until_delay]; spimbot.s:229: j	execute_until_delay
+      343 [0x800002b0]	0x3c011001  lui $1, 4097                    ; spimbot.s:233: lw	$t9, fire_udp_rounds
+      343 [0x800002b4]	0x8c390008  lw $25, 8($1)
+      436 [0x800002b8]	0x13200005  beq $25, $0, 20 [udp_done-0x800002b8]; spimbot.s:236: beq	$t9, $zero, udp_done
+       93 [0x800002bc]	0x3c01ffff  lui $1, -1                      ; spimbot.s:237: sw	$zero, SHOOT_UDP_PACKET
+       93 [0x800002c0]	0xac2000e0  sw $0, 224($1)
+       93 [0x800002c4]	0x2339ffff  addi $25, $25, -1               ; spimbot.s:238: sub	$t9, $t9, 1
+       93 [0x800002c8]	0x080000ae  j 0x000002b8 [udp_fire]         ; spimbot.s:239: j	udp_fire
+      343 [0x800002cc]	0x3c011001  lui $1, 4097                    ; spimbot.s:242: sw	$zero, fire_udp_rounds
+      343 [0x800002d0]	0xac200008  sw $0, 8($1)
+      343 [0x800002d4]	0x08000088  j 0x00000220 [execute_until_delay]; spimbot.s:244: j	execute_until_delay
+      343 [0x800002d8]	0x3c011001  lui $1, 4097 [arena_map]        ; spimbot.s:248: la	$t5, arena_map			# packets to fire at the host at given (x, y)
+      343 [0x800002dc]	0x342d000c  ori $13, $1, 12 [arena_map]
+      343 [0x800002e0]	0x3c01ffff  lui $1, -1                      ; spimbot.s:249: sw	$t5, ARENA_MAP
+      343 [0x800002e4]	0xac2d00dc  sw $13, 220($1)
+      343 [0x800002e8]	0x212af448  addi $10, $9, -3000             ; spimbot.s:251: sub	$t2, $t1, 3000			# command offset
+      343 [0x800002ec]	0x000a5982  srl $11, $10, 6                 ; spimbot.s:252: srl	$t3, $t2, 6			# x-tile (NOT pixel!)
+      343 [0x800002f0]	0x314c003f  andi $12, $10, 63               ; spimbot.s:253: and	$t4, $t2, 0x3f			# y-tile (NOT pixel!)
+      343 [0x800002f4]	0x3c011001  lui $1, 4097                    ; spimbot.s:255: lw	$t9, is_blue_bot		# orientation matters
+      343 [0x800002f8]	0x8c39064c  lw $25, 1612($1)
+      343 [0x800002fc]	0x13200007  beq $25, $0, 28 [hostcheck_loadtile-0x800002fc]; spimbot.s:256: beq	$t9, $zero, hostcheck_loadtile	# don't change tile if red bot
+        0 [0x80000300]	0x216bffd9  addi $11, $11, -39              ; spimbot.s:258: sub	$t3, $t3, 39			# fall-through to flipping tile across y = x
+        0 [0x80000304]	0x218cffd9  addi $12, $12, -39              ; spimbot.s:259: sub	$t4, $t4, 39			# (i.e. x = 39 - x; y = 39 - y)
+        0 [0x80000308]	0x05610002  bgez $11 8                      ; spimbot.s:260: abs	$t3, $t3
+        0 [0x8000030c]	0x000b5822  sub $11, $0, $11
+        0 [0x80000310]	0x05810002  bgez $12 8                      ; spimbot.s:261: abs	$t4, $t4
+        0 [0x80000314]	0x000c6022  sub $12, $0, $12
+      343 [0x80000318]	0x34010028  ori $1, $0, 40                  ; spimbot.s:264: mul	$t4, $t4, 40			# map[y][x] == map[y * 40 + x]
+      343 [0x8000031c]	0x71816002  mul $12, $12, $1
+      343 [0x80000320]	0x016c5820  add $11, $11, $12               ; spimbot.s:265: add	$t3, $t3, $t4			# index at $t3
+      343 [0x80000324]	0x34190000  ori $25, $0, 0                  ; spimbot.s:267: li	$t9, 0				# number of shots to fire
+      343 [0x80000328]	0x3c011001  lui $1, 4097                    ; spimbot.s:269: lb	$t6, arena_map($t3)		# load tile type
+      343 [0x8000032c]	0x002b0821  addu $1, $1, $11
+      343 [0x80000330]	0x802e000c  lb $14, 12($1)
+      343 [0x80000334]	0x31cf0004  andi $15, $14, 4                ; spimbot.s:271: and	$t7, $t6, 4			# check friendly host
+      343 [0x80000338]	0x15e00005  bne $15, $0, 20 [hostcheck_add_0-0x80000338]; spimbot.s:272: bne	$t7, $zero, hostcheck_add_0	# branch if friendly host
+       76 [0x8000033c]	0x31d80008  andi $24, $14, 8                ; spimbot.s:274: and	$t8, $t6, 8			# check enemy host
+       76 [0x80000340]	0x13000002  beq $24, $0, 8 [hostcheck_add_1-0x80000340]; spimbot.s:275: beq	$t8, $zero, hostcheck_add_1	# branch if neutral host
+       17 [0x80000344]	0x23390001  addi $25, $25, 1                ; spimbot.s:279: add	$t9, $t9, 1			# 2 total shots if enemy
+       76 [0x80000348]	0x23390001  addi $25, $25, 1                ; spimbot.s:282: add	$t9, $t9, 1			# 1 total shot if neutral
+      343 [0x8000034c]	0x3c011001  lui $1, 4097                    ; spimbot.s:285: sw	$t9, fire_udp_rounds		# 0 shots if friendly
+      343 [0x80000350]	0xac390008  sw $25, 8($1)
+      343 [0x80000354]	0x08000088  j 0x00000220 [execute_until_delay]; spimbot.s:286: j	execute_until_delay
+        0 [0x80000358]	0x3c01ff67  lui $1, -153                    ; spimbot.s:290: sub	$t0, $t1, 10000000		# subtract "opcode"
+        0 [0x8000035c]	0x34216980  ori $1, $1, 27008
+        0 [0x80000360]	0x01214020  add $8, $9, $1
+        0 [0x80000364]	0x08000088  j 0x00000220 [execute_until_delay]; spimbot.s:291: j	execute_until_delay
+      162 [0x80000368]	0x3c01fa0a  lui $1, -1526                   ; spimbot.s:295: sub	$t1, $t1, 100000000		# subtract "opcode"
+      162 [0x8000036c]	0x34211f00  ori $1, $1, 7936
+      162 [0x80000370]	0x01214820  add $9, $9, $1
+      162 [0x80000374]	0x3c01ffff  lui $1, -1                      ; spimbot.s:296: lw	$t2, TIMER
+      162 [0x80000378]	0x8c2a001c  lw $10, 28($1)
+      162 [0x8000037c]	0x01495020  add $10, $10, $9                ; spimbot.s:297: add	$t2, $t2, $t1			# add delay (in cycles) to current cycle count
+      162 [0x80000380]	0x3c01ffff  lui $1, -1                      ; spimbot.s:298: sw	$t2, TIMER			# request interrupt
+      162 [0x80000384]	0xac2a001c  sw $10, 28($1)
+      162 [0x80000388]	0x3c011001  lui $1, 4097                    ; spimbot.s:304: sw	$t0, current_move
+      162 [0x8000038c]	0xac280000  sw $8, 0($1)
+      162 [0x80000390]	0x08000077  j 0x000001dc [interrupt_dispatch]; spimbot.s:305: j	interrupt_dispatch		# see if other interrupts are waiting
+     1424 [0x80000394]	0x3c01ffff  lui $1, -1                      ; spimbot.s:308: sw	$zero, REQUEST_PUZZLE_ACK
+     1424 [0x80000398]	0xac2000d8  sw $0, 216($1)
+     1424 [0x8000039c]	0x3c011001  lui $1, 4097 [has_puzzle]       ; spimbot.s:311: , $t5, 	
+     1424 [0x800003a0]	0x34280004  ori $8, $1, 4 [has_puzzle]
+     1424 [0x800003a4]	0x34090001  ori $9, $0, 1                   ; spimbot.s:312: li	$t1, 1
+     1424 [0x800003a8]	0xad090000  sw $9, 0($8)                    ; spimbot.s:313: sw	$t1, ($t0)
+     1424 [0x800003ac]	0x08000077  j 0x000001dc [interrupt_dispatch]; spimbot.s:315: j	interrupt_dispatch
+        0 [0x800003b0]	0x3c01ffff  lui $1, -1                      ; spimbot.s:320: sw	$zero, TIMER_ACK
+        0 [0x800003b4]	0xac20006c  sw $0, 108($1)
+        0 [0x800003b8]	0x3c01ffff  lui $1, -1                      ; spimbot.s:323: sw	$zero, RESPAWN_ACK
+        0 [0x800003bc]	0xac2000f0  sw $0, 240($1)
+        0 [0x800003c0]	0x3c01ffff  lui $1, -1                      ; spimbot.s:325: lw	$t8, BOT_X			# get current location
+        0 [0x800003c4]	0x8c380020  lw $24, 32($1)
+        0 [0x800003c8]	0x3c01ffff  lui $1, -1                      ; spimbot.s:326: lw	$t9, BOT_Y			# more details on host mapping in scripts/host_mapping.md
+        0 [0x800003cc]	0x8c390024  lw $25, 36($1)
+        0 [0x800003d0]	0x0018c0c2  srl $24, $24, 3                 ; spimbot.s:328: srl	$t8, $t8, 3			# convert pixels to tiles (divide by 8)
+        0 [0x800003d4]	0x0019c8c2  srl $25, $25, 3                 ; spimbot.s:329: srl	$t9, $t9, 3
+        0 [0x800003d8]	0x34080000  ori $8, $0, 0                   ; spimbot.s:331: li	$t0, 0				# bitstring for pointer array index. Bits "3210", 0 is LSB
+        0 [0x800003dc]	0x340e0008  ori $14, $0, 8                  ; spimbot.s:333: li	$t6, 8				# what x will be compared to for bit 3
+        0 [0x800003e0]	0x340f0008  ori $15, $0, 8                  ; spimbot.s:334: li	$t7, 8				# what y will be compared to for bit 2
+        0 [0x800003e4]	0x2b010010  slti $1, $24, 16                ; spimbot.s:337: blt	$t8, 16, respawn_bit_2_y
+        0 [0x800003e8]	0x14200003  bne $1, $0, 12 [respawn_bit_2_y-0x800003e8]
+        0 [0x800003ec]	0x35080008  ori $8, $8, 8                   ; spimbot.s:338: or	$t0, $t0, 8			# set bit 3
+        0 [0x800003f0]	0x340e0020  ori $14, $0, 32                 ; spimbot.s:339: li	$t6, 32
+        0 [0x800003f4]	0x2b210010  slti $1, $25, 16                ; spimbot.s:342: blt	$t9, 16, respawn_bit_1_0
+        0 [0x800003f8]	0x14200003  bne $1, $0, 12 [respawn_bit_1_0-0x800003f8]
+        0 [0x800003fc]	0x35080004  ori $8, $8, 4                   ; spimbot.s:343: or	$t0, $t0, 4			# set bit 2
+        0 [0x80000400]	0x340f0020  ori $15, $0, 32                 ; spimbot.s:344: li	$t7, 32
+        0 [0x80000404]	0x15d80003  bne $14, $24, 12                ; spimbot.s:347: sge	$t1, $t8, $t6			# $t1 is 0 if x < [8/32], else 1
+        0 [0x80000408]	0x34090001  ori $9, $0, 1
+        0 [0x8000040c]	0x10000002  beq $0, $0, 8
+        0 [0x80000410]	0x01d8482a  slt $9, $14, $24
+        0 [0x80000414]	0x15f90003  bne $15, $25, 12                ; spimbot.s:348: sge	$t2, $t9, $t7			# $t2 is 0 if y < [8/32], else 1
+        0 [0x80000418]	0x340a0001  ori $10, $0, 1
+        0 [0x8000041c]	0x10000002  beq $0, $0, 8
+        0 [0x80000420]	0x01f9502a  slt $10, $15, $25
+        0 [0x80000424]	0x00094840  sll $9, $9, 1                   ; spimbot.s:350: sll	$t1, $t1, 1			# make $t1 into bit 1
+        0 [0x80000428]	0x01094025  or $8, $8, $9                   ; spimbot.s:352: or	$t0, $t0, $t1			# set bit 1
+        0 [0x8000042c]	0x010a4025  or $8, $8, $10                  ; spimbot.s:353: or	$t0, $t0, $t2			# set bit 0
+        0 [0x80000430]	0x00084080  sll $8, $8, 2                   ; spimbot.s:356: sll	$t0, $t0, 2			# multiply by 4
+        1 [0x80000434]	0x3c011003  lui $1, 4099 [respawn_pointers+65536 (0x00010000)]; spimbot.s:358: lw	$t5, respawn_pointers($t0)	# load in instruction to start at
+        1 [0x80000438]	0x00280821  addu $1, $1, $8
+        0 [0x8000043c]	0x8c2df05c  lw $13, -4004($1) [respawn_pointers]
+        0 [0x80000440]	0x3c011001  lui $1, 4097                    ; spimbot.s:360: sw	$t5, current_move		# set instruction counter
+        0 [0x80000444]	0xac2d0000  sw $13, 0($1)
+        0 [0x80000448]	0x3c01ffff  lui $1, -1                      ; spimbot.s:361: sw	$zero, TIMER			# request timer interrupt immediately so timer loop takes over
+        0 [0x8000044c]	0xac20001c  sw $0, 28($1)
+        0 [0x80000450]	0x08000077  j 0x000001dc [interrupt_dispatch]; spimbot.s:363: j	interrupt_dispatch
+        0 [0x80000454]	0x34020004  ori $2, $0, 4                   ; spimbot.s:366: li	$v0, PRINT_STRING
+        0 [0x80000458]	0x3c019000  lui $1, -28672 [non_intrpt_str] ; spimbot.s:367: la	$a0, non_intrpt_str
+        0 [0x8000045c]	0x34240244  ori $4, $1, 580 [non_intrpt_str]
+        0 [0x80000460]	0x0000000c  syscall                         ; spimbot.s:368: syscall					# print out an error message
+     1586 [0x80000464]	0x3c019000  lui $1, -28672 [chunkIH]        ; spimbot.s:371: la	$k0, chunkIH
+     1586 [0x80000468]	0x343a0208  ori $26, $1, 520 [chunkIH]
+     1586 [0x8000046c]	0x8f480030  lw $8, 48($26)                  ; spimbot.s:376: lw	$t0, 48($k0)
+     1586 [0x80000470]	0x01000011  mthi $8                         ; spimbot.s:377: mthi	$t0
+     1586 [0x80000474]	0x8f480034  lw $8, 52($26)                  ; spimbot.s:378: lw	$t0, 52($k0)
+     1586 [0x80000478]	0x01000013  mtlo $8                         ; spimbot.s:379: mtlo	$t0
+     1586 [0x8000047c]	0x8f440000  lw $4, 0($26)                   ; spimbot.s:381: lw	$a0, 0($k0)			# Restore saved registers
+     1586 [0x80000480]	0x8f420004  lw $2, 4($26)                   ; spimbot.s:382: lw	$v0, 4($k0)
+     1586 [0x80000484]	0x8f480008  lw $8, 8($26)                   ; spimbot.s:383: lw	$t0, 8($k0)
+     1586 [0x80000488]	0x8f49000c  lw $9, 12($26)                  ; spimbot.s:384: lw	$t1, 12($k0)
+     1586 [0x8000048c]	0x8f4a0010  lw $10, 16($26)                 ; spimbot.s:385: lw	$t2, 16($k0)
+     1586 [0x80000490]	0x8f4b0014  lw $11, 20($26)                 ; spimbot.s:386: lw	$t3, 20($k0)
+     1586 [0x80000494]	0x8f4c0018  lw $12, 24($26)                 ; spimbot.s:387: lw	$t4, 24($k0)
+     1586 [0x80000498]	0x8f4d001c  lw $13, 28($26)                 ; spimbot.s:388: lw	$t5, 28($k0)
+     1586 [0x8000049c]	0x8f4e0020  lw $14, 32($26)                 ; spimbot.s:389: lw	$t6, 32($k0)
+     1586 [0x800004a0]	0x8f4f0024  lw $15, 36($26)                 ; spimbot.s:390: lw	$t7, 36($k0)
+     1586 [0x800004a4]	0x8f580028  lw $24, 40($26)                 ; spimbot.s:391: lw	$t8, 40($k0)
+     1586 [0x800004a8]	0x8f59002c  lw $25, 44($26)                 ; spimbot.s:392: lw	$t9, 44($k0)
+     1586 [0x800004ac]	0x001b0821  addu $1, $0, $27                ; spimbot.s:395: move	$at, $k1			# Restore $at
+     1586 [0x800004b0]	0x42000018  eret                            ; spimbot.s:397: eret
