@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# assemble.py: Converts AML to IML JSON
+
 ### Movement Pattern
 # -360 to 360		absolute angle
 # 1500 +- v		velocity
@@ -12,8 +14,8 @@
 import sys
 import os
 import math
+import json
 
-import replace_line
 from path.path_generator import HOST_INDEX_TO_POINTS
 
 class AssemblerError(RuntimeError):
@@ -240,54 +242,47 @@ class Lexer:
 
 if __name__ == '__main__':
     USAGE = """\
-Example usages:
+error: no AML instruction file specified.
+
+example usages:
 
 assemble.py <instruction_file>
     Assembles movement: and respawn_pointers: data segments.
-    Outputs to stdout.
+    Outputs JSON to stdout.
 
-assemble.py <instruction_file> -r
+assemble.py <instruction_file> <output_file>
     Assembles movement: and respawn_pointers: data segments.
-    Replaces respective lines in spimbot.s
-
-assemble.py <instruction_file> -r <assembly_file>
-    Assembles movement: and respawn_pointers: data segments.
-    Replaces respective lines in <assembly_file>
+    Outputs JSON to <output_file>.
     """
 
     try:
         inst_filename = sys.argv[1]
     except:
         print(USAGE)
-        sys.exit(0)
+        sys.exit(1)
+
+    if not os.path.exists(inst_filename):
+        print('No such file', inst_filename)
+        sys.exit(1)
 
     try:
-        replace = sys.argv[2] == '-r'
-    except IndexError:
-        replace = False
-
-    if replace:
-        try:
-            asm_filename = sys.argv[3]
-        except IndexError:
-            scripts_dir = os.path.dirname(__file__)
-            asm_filename = os.path.normpath(os.path.join(scripts_dir, '..', 'spimbot.s'))
-
-        if not os.path.exists(asm_filename):
-            print('No such file', asm_filename)
-            sys.exit(1)
+        output_filename = sys.argv[2]
+    except:
+        output_file = sys.stdout
+    else:
+        output_file = open(output_filename, 'w')
 
     lexer = Lexer()
 
-    with open(inst_filename) as f:
-        lines = f.readlines()
+    with open(inst_filename) as inst_file:
+        lines = inst_file.readlines()
 
-    output, respawn_pointers_output = lexer.parse(lines)
+    movement_data, respawn_pointers_data = lexer.parse(lines)
 
-    if not replace:
-        print(output)
-        print(respawn_pointers_output)
-    else:
-        replace_line.replace_in_file(asm_filename, 'movement:', output + '\n')
-        replace_line.replace_in_file(asm_filename, 'respawn_pointers:',
-            respawn_pointers_output + '\n')
+    json = json.dumps({
+        'movement': movement_data,
+        'respawn_pointers': respawn_pointers_data
+    }, indent=4)
+
+    with output_file:
+        output_file.write(json + '\n')
