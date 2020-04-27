@@ -37,6 +37,7 @@ RESPAWN_ACK		= 0xffff00f0  ## Respawn
 # our constants
 MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
 SOLVE_SLOWDOWN_CYCLES = 0
+MAX_XY_TILES = 39
 
 .data
 
@@ -215,6 +216,7 @@ execute_angle:					# set angle
 
 	add	$t1, $t1, 180			# fall-through to adding 180 for starting bottom-right (blue bot)
 						# (angle comes direct from cmd parameter since no opcode offset)
+	#rem	$t1, $t1, 360			# ensure angle is within -360 to 360 (necessary??)
 
 angle_write:
 	sw	$t1, ANGLE
@@ -253,14 +255,13 @@ execute_hostcheck:				# hostcheck sets appropriate # of UDP
 	and	$t4, $t2, 0x3f			# y-tile (NOT pixel!)
 
 	lw	$t9, is_blue_bot		# orientation matters
-	beq	$t9, $zero, hostcheck_loadtile	# don't change tile if red bot
+	beq	$t9, $zero, hostcheck_no_reflect# don't change tile if red bot
 
-	sub	$t3, $t3, 39			# fall-through to flipping tile across y = x
-	sub	$t4, $t4, 39			# (i.e. x = 39 - x; y = 39 - y)
-	abs	$t3, $t3
-	abs	$t4, $t4
+	li	$t5, MAX_XY_TILES
+	sub	$t3, $t5, $t3			# fall-through to reflecting tile *about the origin*
+	sub	$t4, $t5, $t4			# (i.e. x = 39 - x; y = 39 - y)
 
-hostcheck_loadtile:
+hostcheck_no_rotate_tile:
 	mul	$t4, $t4, 40			# map[y][x] == map[y * 40 + x]
 	add	$t3, $t3, $t4			# index at $t3
 
@@ -327,6 +328,15 @@ respawn_interrupt:
 
 	srl	$t8, $t8, 3			# convert pixels to tiles (divide by 8)
 	srl	$t9, $t9, 3
+
+	lw	$t0, is_blue_bot		# orientation matters
+	beq	$t0, $zero, respawn_no_reflect	# don't change tile if red bot
+
+	li	$t1, MAX_XY_TILES
+	sub	$t8, $t1, $t8			# fall-through to reflecting tile *about the origin*
+	sub	$t9, $t1, $t9			# (i.e. x = 39 - x; y = 39 - y)
+
+respawn_no_reflect:
 
 	li	$t0, 0				# bitstring for pointer array index. Bits "3210", 0 is LSB
 
