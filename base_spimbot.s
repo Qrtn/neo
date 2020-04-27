@@ -697,23 +697,25 @@ toggle_light_end:
 #################################
 .data
 
-# Expecting the following labels to be populated:
-# movement: the "instruction memory"
+# !! Expecting the following labels to be populated:
 #
-# respawn_pointers: for each host index i, respawn_pointers[i] = a pointer to
-#     the right instruction to restart at inside movement, given that the bot
-#     respawned at host index i. aka bot's first instruction should be
-#     movement[respawn_pointers[i]]
+# movement: [.word] the "instruction memory"
 #
-# puzzle_table: lookup table for { dimension_id, bottom_row_bits } to get
-#     correct top row toggles to apply after chasing lights down once. The
+# respawn_pointers: [.word] for each host index i, respawn_pointers[i] = a
+#     pointer to the right instruction to restart at inside movement, given
+#     that the bot respawned at host index i. aka bot's first instruction
+#     should be movement[respawn_pointers[i]]
+#
+# puzzle_table: [.half] lookup table for { dimension_id, bottom_row_bits } to
+#     get correct top row toggles to apply after chasing lights down once. The
 #     puzzle will be solved after chasing lights down once more
 #
-# dim_id_table: lookup table to convert puzzle_dim_bits to dimension_id. This
-#     is done to decrease the number of bits needed to represent a puzzle
-#     dimension
+# dim_id_table: [.byte] lookup table to convert puzzle_dim_bits to
+#     dimension_id. This is done to decrease the number of bits needed to
+#     represent a puzzle dimension
 #
-# These placeholders will be replaced using scripts/replace.py
+# !! These placeholders from base_spimbot.sh will be replaced using
+# scripts/combine.py and output to build/mips/
 
 movement:
 $data_movement

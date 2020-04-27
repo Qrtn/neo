@@ -1,0 +1,4 @@
+{
+    "movement": ".word 0",
+    "respawn_pointers": ".word 0"
+}
