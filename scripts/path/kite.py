@@ -1,7 +1,10 @@
 #!/usr/bin/python3
+import sys
 from pprint import pprint
 
 from path_generator import *
+
+RED_CLOCKWISE = True
 
 goto_points = [
     (66, 66),
@@ -14,6 +17,10 @@ goto_points = [
 
 reflect_goto_points = reflect_points(goto_points, True)
 goto_points = combine_and_dedupe(goto_points, reflect_goto_points)
+
+if RED_CLOCKWISE:
+    goto_points.append(goto_points.pop(0))
+    goto_points.reverse()
 
 def print_goto_points():
     pprint(goto_points)
@@ -33,6 +40,10 @@ reflect_udp_targets = [sorted(reflect_points(points, True)) for points in
     udp_targets]
 
 udp_targets += reflect_udp_targets
+
+if RED_CLOCKWISE:
+    udp_targets.append(udp_targets.pop(0))
+    udp_targets.reverse()
 
 def print_udp_targets():
     pprint(udp_targets)
@@ -63,6 +74,22 @@ respawn_paths = [
     ([], 6),
 ]
 
+if RED_CLOCKWISE:
+    # Converting from CCW restart_at to CW restart_at
+    # x -> (n - x) % n
+    # 0 -> (n - 0) % n
+    # 1 -> n - 1
+    # 2 -> n - 2
+    # ...
+    # n - 1 -> n - (n - 1) = 1
+
+    n = len(goto_points)
+
+    for i in range(len(respawn_paths)):
+        extra_visits, restart_at = respawn_paths[i]
+        new_restart_at = (n - restart_at) % n
+        respawn_paths[i] = (extra_visits, new_restart_at)
+
 def print_respawn_paths():
     for i, path in enumerate(respawn_paths):
         print(i, str(path[0]).ljust(8), path[1], goto_points[path[1]], sep='\t')
@@ -73,5 +100,7 @@ if __name__ == '__main__':
     #print_goto_points()
     #print_udp_targets()
     #print_respawn_paths()
+
+    print('!important! RED_CLOCKWISE is', RED_CLOCKWISE, file=sys.stderr)
 
     print(generate(goto_points, udp_targets, respawn_paths), end='')
