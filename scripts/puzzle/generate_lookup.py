@@ -3,6 +3,7 @@
 import sys
 import os
 import itertools
+import json
 
 from puzzle_dim import PuzzleDimension, dimensions, encode_puzzle_dim, \
     puzzle_dim_bits_to_dim_id, dim_id
@@ -110,36 +111,31 @@ if __name__ == '__main__':
 Example usages:
 
 generate_lookup.py
-    Generates lookup table and outputs to stdout
+    Generates lookup tables and outputs JSON to stdout
 
-generate_lookup.py -r
-    Generates lookup table and replaces respective line in spimbot.s
-
-generate_lookup.py -r <assembly_file>
-    Generates lookup table and replaces respective line in <assembly_file>
+generate_lookup.py <output_file>
+    Generates lookup tables and outputs JSON to output_file
 
 generate_lookup.py -h
     Prints usage\
     """
 
-    replace = False
+    output_filename = None
 
-    if len(sys.argv) > 1:
-        if sys.argv[1] == '-h':
-            print(USAGE)
-            sys.exit(0)
-        elif sys.argv[1] == '-r':
-            replace = True
+    try:
+        output_filename = sys.argv[1]
+    except IndexError:
+        pass
 
-            try:
-                asm_filename = sys.argv[3]
-            except IndexError:
-                asm_filename = os.path.normpath(os.path.join(scripts_dir, '..',
-                    'spimbot.s'))
+    if output_filename == '-h':
+        print(USAGE)
+        sys.exit(0)
 
-            if not os.path.exists(asm_filename):
-                print('No such file', asm_filename)
-                sys.exit(1)
+    if output_filename is None:
+        output_file = sys.stdout
+    else:
+        output_file = open(output_filename, 'w')
+
 
     puzzle_data = generate_data_segment(TOP_ROW_DATATYPE,
         generate_puzzle_lookup_array())
@@ -147,9 +143,12 @@ generate_lookup.py -h
     dim_id_data = generate_data_segment(DIM_ID_DATATYPE,
         generate_dim_id_lookup_array())
 
-    if not replace:
-        print(puzzle_data)
-        print(dim_id_data)
-    else:
-        replace_line.replace_in_file(asm_filename, 'puzzle_table:', puzzle_data + '\n')
-        replace_line.replace_in_file(asm_filename, 'dim_id_table:', dim_id_data + '\n')
+
+    json = json.dumps({
+        'puzzle_data': puzzle_data,
+        'dim_id_data': dim_id_data
+    }, indent=4)
+
+
+    with output_file:
+        output_file.write(json + '\n')
