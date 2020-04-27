@@ -11,10 +11,6 @@ from puzzle_general import generate_all_rows
 import solve
 import generate_top_row
 
-scripts_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(scripts_dir)
-import replace_line
-
 
 ENCODED_ROW_WIDTH = 10
 TOP_ROW_DATATYPE = '.half'
@@ -108,7 +104,7 @@ def generate_data_segment(datatype, array):
 
 if __name__ == '__main__':
     USAGE = """\
-Example usages:
+usage:
 
 generate_lookup.py
     Generates lookup tables and outputs JSON to stdout
@@ -143,12 +139,10 @@ generate_lookup.py -h
     dim_id_data = generate_data_segment(DIM_ID_DATATYPE,
         generate_dim_id_lookup_array())
 
-
-    json = json.dumps({
-        'puzzle_data': puzzle_data,
-        'dim_id_data': dim_id_data
-    }, indent=4)
-
+    data = {
+        'puzzle_table': puzzle_data,
+        'dim_id_table': dim_id_data
+    }
 
     with output_file:
-        output_file.write(json + '\n')
+        json.dump(data, output_file, indent=4)

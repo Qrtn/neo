@@ -244,7 +244,7 @@ if __name__ == '__main__':
     USAGE = """\
 error: no AML instruction file specified.
 
-example usages:
+usage:
 
 assemble.py <instruction_file>
     Assembles movement: and respawn_pointers: data segments.
@@ -279,10 +279,10 @@ assemble.py <instruction_file> <output_file>
 
     movement_data, respawn_pointers_data = lexer.parse(lines)
 
-    json = json.dumps({
+    data = {
         'movement': movement_data,
         'respawn_pointers': respawn_pointers_data
-    }, indent=4)
+    }
 
     with output_file:
-        output_file.write(json + '\n')
+        json.dump(data, output_file, indent=4)

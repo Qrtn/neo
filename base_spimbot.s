@@ -718,13 +718,13 @@ toggle_light_end:
 # scripts/combine.py and output to build/mips/
 
 movement:
-$data_movement
+@movement
 
 respawn_pointers:
-$data_respawn_pointers
+@respawn_pointers
 
 puzzle_table:
-$data_puzzle_table
+@puzzle_table
 
 dim_id_table:
-$data_dim_id_table
+@dim_id_table
