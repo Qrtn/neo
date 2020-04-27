@@ -104,10 +104,10 @@ main_check_puzzle_available:
 	lw	$t0, has_puzzle				# Kernel writes to has_puzzle when puzzle is available
 	beq	$t0, $zero, main_check_puzzle_available	# has_puzzle used to communicate between kernel and user
 
-	li	$t9, SOLVE_SLOWDOWN_CYCLES		# ! For artifically throttling the solver's speed
-solve_slowdown:						# ! COMMENT lines with ! when releasing full version
-	sub	$t9, $t9, 2				# ! COMMENT
-	bgtz	$t9, solve_slowdown			# ! COMMENT
+#	li	$t9, SOLVE_SLOWDOWN_CYCLES		# ! For artifically throttling the solver's speed
+#solve_slowdown:						# ! COMMENT lines with ! when releasing full version
+#	sub	$t9, $t9, 2				# ! COMMENT
+#	bgtz	$t9, solve_slowdown			# ! COMMENT
 
 	jal	solve					# Call solver
 
