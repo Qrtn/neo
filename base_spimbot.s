@@ -60,6 +60,12 @@ fire_udp_rounds: .word 0
 ### Arena Map
 arena_map: .byte 0:1600
 
+### Scanner
+scanner_wb:
+hit_x: .byte 0
+hit_y: .byte 0
+tile_type: .byte 0
+
 ### Other
 is_blue_bot: .word 0
 
@@ -185,6 +191,7 @@ interrupt_dispatch:				# Interrupt:
 # 1500 +- v		velocity
 # 2000			UDP, may be contingent on previous check of arena map
 # 3000 + (x << 6) + y	Check arena map at x, y and set flag for next UDP
+# 6000			Sweep shoot
 # 10000000 + cm		Set current_move to cm
 # 20000000		End program
 # 100000000 + c		Delay c cycles
@@ -204,6 +211,7 @@ no_debug:
 	blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
 	blt	$t1, 2000, execute_velocity	# depending on range of instruction (think of it like a weird
 	beq	$t1, 2000, execute_udp		# opcode that works with integer ranges instead of bits)
+	beq	$t1, 6000, execute_sweep_shoot
 	blt	$t1, 10000000, execute_hostcheck
 	beq	$t1, 20000000, return_end
 	blt	$t1, 100000000, execute_jump
@@ -244,6 +252,32 @@ udp_done:
 	sw	$zero, fire_udp_rounds
 
 	j	execute_until_delay
+
+# INSTRUCTION
+execute_sweep_shoot:
+	li 	$t2, 3
+	li	$t3, 360
+	li	$t4, 1				# t2 = angle jump, t3 = angle end, t4 = absolute angle control
+	la 	$t5, scanner_wb
+
+	li 	$t7, 24				# enemy player
+
+loop_sweep:
+	sw	$t3, ANGLE
+	sw	$t4, ANGLE_CONTROL		# 1 = "absolute" angle control and store confirms and sets angle
+
+	sw 	$t5, USE_SCANNER
+	
+	lb 	$t6, tile_type
+	bne 	$t6, $t7, finish_loop_sweep
+
+	sw	$zero, SHOOT_UDP_PACKET
+	j 	execute_until_delay
+
+finish_loop_sweep:
+	sub 	$t3, $t3, $t2
+	bgtz	$t3, loop_sweep
+	j 	execute_until_delay
 
 # INSTRUCTION
 execute_hostcheck:				# hostcheck sets appropriate # of UDP

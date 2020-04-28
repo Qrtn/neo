@@ -35,6 +35,7 @@ class Compiler:
             'goto': self.goto,
             'shoot': self.shoot,
             'shootpos': self.shootpos,
+            'sweep_shoot': self.sweep_shoot,
             'hostcheck': self.hostcheck,
             'chkshoot': self.chkshoot,
             'internal_loc': self.set_internal_location,
@@ -113,6 +114,10 @@ class Compiler:
         angle = self.get_angle_to(x, y)
         cmd = self.set_angle(angle) + self.shoot()
         return cmd
+
+    def sweep_shoot(self):
+        cmd = 6000
+        return [cmd]
 
     def hostcheck(self, tile_x, tile_y):
         cmd = 3000 + (tile_x << 6) + tile_y

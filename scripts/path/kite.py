@@ -96,6 +96,11 @@ def print_respawn_paths():
 
 assert len(respawn_paths) == len(HOST_INDEX_TO_POINTS)
 
+should_sweep_shoot = [True] * len(goto_points)
+
+def print_sweep_shoot():
+    pprint(should_sweep_shoot)
+
 if __name__ == '__main__':
     #print_goto_points()
     #print_udp_targets()
@@ -103,4 +108,4 @@ if __name__ == '__main__':
 
     print('!important! RED_CLOCKWISE is', RED_CLOCKWISE, file=sys.stderr)
 
-    print(generate(goto_points, udp_targets, respawn_paths), end='')
+    print(generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot), end='')

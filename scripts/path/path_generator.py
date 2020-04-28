@@ -64,19 +64,25 @@ def complete_points(points, x_pos, dedupe=True):
 
     return points + reflected
 
-def generate(goto_points, udp_targets, respawn_paths):
+def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
+    if should_sweep_shoot is None:
+        should_sweep_shoot = [False] * len(goto_points)
+
     lines = GENERATOR_HEADER.copy()
     section_linenos = []
 
     lines.append('# Main section (executes on initial spawn)')
 
-    for point, targets in zip(goto_points, udp_targets):
+    for point, targets, sweep_shoot in zip(goto_points, udp_targets, should_sweep_shoot):
         section_linenos.append(len(lines) + 1)
 
         section_lines = []
 
         goto = 'goto {} {}'.format(*point)
         section_lines.append(goto)
+
+        if sweep_shoot:
+            section_lines.append('sweep_shoot')
 
         for target in targets:
             chkshoot = 'chkshoot {} {}'.format(*target)
