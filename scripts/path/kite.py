@@ -4,7 +4,7 @@ from pprint import pprint
 
 from path_generator import *
 
-RED_CLOCKWISE = True
+CLOCKWISE = True
 
 goto_points = [
     (66, 66),
@@ -18,7 +18,7 @@ goto_points = [
 reflect_goto_points = reflect_points(goto_points, True)
 goto_points = combine_and_dedupe(goto_points, reflect_goto_points)
 
-if RED_CLOCKWISE:
+if CLOCKWISE:
     goto_points.append(goto_points.pop(0))
     goto_points.reverse()
 
@@ -41,7 +41,7 @@ reflect_udp_targets = [sorted(reflect_points(points, True)) for points in
 
 udp_targets += reflect_udp_targets
 
-if RED_CLOCKWISE:
+if CLOCKWISE:
     udp_targets.append(udp_targets.pop(0))
     udp_targets.reverse()
 
@@ -74,7 +74,7 @@ respawn_paths = [
     ([], 6),
 ]
 
-if RED_CLOCKWISE:
+if CLOCKWISE:
     # Converting from CCW restart_at to CW restart_at
     # x -> (n - x) % n
     # 0 -> (n - 0) % n
@@ -106,6 +106,6 @@ if __name__ == '__main__':
     #print_udp_targets()
     #print_respawn_paths()
 
-    print('!important! RED_CLOCKWISE is', RED_CLOCKWISE, file=sys.stderr)
+    print('!important! CLOCKWISE is', CLOCKWISE, file=sys.stderr)
 
     print(generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot), end='')

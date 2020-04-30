@@ -79,10 +79,11 @@ def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
         section_lines = []
 
         goto = 'goto {} {}'.format(*point)
-        section_lines.append(goto)
 
         if sweep_shoot:
-            section_lines.append('sweep_shoot')
+            goto += ' 1'        # enable sweep delay
+
+        section_lines.append(goto)
 
         for target in targets:
             chkshoot = 'chkshoot {} {}'.format(*target)
