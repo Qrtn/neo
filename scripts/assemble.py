@@ -7,9 +7,11 @@
 # 1500 +- v		velocity
 # 2000			UDP, may be contingent on previous check of arena map
 # 3000 + (x << 6) + y	Check arena map at x, y and set flag for next UDP
+# 6000			Sweep shoot
 # 10000000 + cm		Set current_move to cm
 # 20000000		End program
 # 100000000 + c		Delay c cycles
+# 200000000 + c		Delay c cycles and sweep shoot
 
 import sys
 import os
@@ -65,13 +67,18 @@ class Compiler:
         raise AssemblerError("jump is difficult to use. Don't use it unless you know what you're doing")
         return [10000000 + 4 * int(inst)]
 
-    def delay(self, cycles):
-        return [100000000 + int(cycles)]
+    def delay(self, cycles, sweep=0):
+        if not sweep:
+            delay_opcode = 100000000
+        else:
+            delay_opcode = 200000000
 
-    def go(self, pixels):
+        return [delay_opcode + int(cycles)]
+
+    def go(self, pixels, sweep=0):
         time = pixels / (self.moving_vel / 10000)
         return self.set_velocity(self.moving_vel) + \
-            self.delay(time) + self.set_velocity(0)
+            self.delay(time, sweep) + self.set_velocity(0)
 
     def get_dist_to(self, x, y):
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
@@ -86,13 +93,13 @@ class Compiler:
 
         return math.degrees(angle)
 
-    def goto(self, x, y):
+    def goto(self, x, y, sweep=0):
         # Highly tuned for consistency and accuracy
 
         angle = self.get_angle_to(x, y)
         dist = self.get_dist_to(x, y)
         cmd_angle = self.set_angle(angle)
-        cmd_go = self.go(dist)
+        cmd_go = self.go(dist, sweep)
 
         actual_dist = int(dist / (self.moving_vel / 10000)) * \
             (self.moving_vel / 10000)
