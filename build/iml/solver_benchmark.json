@@ -1,0 +1,4 @@
+{
+    "movement": ".word 110000000 20000000",
+    "respawn_pointers": ".word 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+}
