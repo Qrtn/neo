@@ -162,7 +162,12 @@ class Lexer:
 
         return host_index
 
-    def dict_to_array(self, d, size=16):
+    def dict_to_array(self, d):
+        if not d:
+            return arr
+
+        size = max(d) + 1
+
         arr = [0] * size
         for key, val in d.items():
             arr[key] = val
@@ -234,7 +239,7 @@ class Lexer:
                         host_index = self.convert_respawn_coordinates(x, y)
 
                     # New location is center of host
-                    real_x, real_y = HOST_INDEX_TO_POINTS[host_index]
+                    real_x, real_y = HOST_INDEX_TO_POINTS[host_index % 16]
 
                     self.compiler.set_internal_location(real_x, real_y)
                     respawn_pointers[host_index] = 4 * len(words)

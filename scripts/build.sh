@@ -5,7 +5,7 @@ PATH_SCHEMA="$PROJECT_DIR/scripts/path/$1.py"
 
 if [ -f $PATH_SCHEMA ]; then
     # If path exists then generate aml from it
-    $PATH_SCHEMA > $PROJECT_DIR/build/aml/$2.txt
+    $PATH_SCHEMA > $PROJECT_DIR/build/aml/$2.txt ${*:3}
 fi
 
 $PROJECT_DIR/scripts/assemble.py $PROJECT_DIR/build/aml/$2.txt $PROJECT_DIR/build/iml/$2.json

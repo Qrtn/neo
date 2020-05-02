@@ -64,17 +64,23 @@ def complete_points(points, x_pos, dedupe=True):
 
     return points + reflected
 
-def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
+def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None, initial_line_no=0,
+    initial_host_index=0, moving_vel=10):
+
     if should_sweep_shoot is None:
         should_sweep_shoot = [False] * len(goto_points)
 
     lines = GENERATOR_HEADER.copy()
     section_linenos = []
 
+    lines.append('# Setting moving velocity')
+    lines.append('moving_vel {}'.format(moving_vel))
+    lines.append('')
+
     lines.append('# Main section (executes on initial spawn)')
 
     for point, targets, sweep_shoot in zip(goto_points, udp_targets, should_sweep_shoot):
-        section_linenos.append(len(lines) + 1)
+        section_linenos.append(initial_line_no + len(lines) + 1)
 
         section_lines = []
 
@@ -92,7 +98,7 @@ def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
         lines += section_lines
 
     start_of_main = section_linenos[0]
-    end_of_main = len(lines)
+    end_of_main = initial_line_no + len(lines)
 
     main_copy = '!!copy {} {} {}'.format(COPY_TIMES, start_of_main,
         end_of_main)
@@ -101,7 +107,7 @@ def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
     # Main section done
     lines += ['']
 
-    for host_index, path in enumerate(respawn_paths):
+    for host_index, path in enumerate(respawn_paths, start=initial_host_index):
         section_lines = []
 
         extra_visits, restart_at_index = path
@@ -109,7 +115,7 @@ def generate(goto_points, udp_targets, respawn_paths, should_sweep_shoot=None):
         restart_at_line = section_linenos[restart_at_index]
 
         section_header = '# Host index {} at ({}, {})'.format(host_index,
-            *HOST_INDEX_TO_POINTS[host_index])
+            *HOST_INDEX_TO_POINTS[host_index - initial_host_index])
         section_respawn = '!respawn {}'.format(host_index)
 
         section_lines += [section_header, section_respawn]

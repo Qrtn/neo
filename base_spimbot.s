@@ -39,10 +39,12 @@ MAX_SOLUTION_SIZE = 65	# num_rows = 13, num_cols = 5
 SOLVE_SLOWDOWN_CYCLES = 0
 MAX_XY_TILES = 39
 
-SWEEP_DELAY_INTERVAL = 30000
+SWEEP_DELAY_INTERVAL = 22500
 SWEEP_SHOOT_CYCLES = 900
 
 SWEEP_SHOOT_ANGLE = 3
+
+RESPAWN_FLIPS_DIRECTION = 0				# 0 -> Flips, 2 -> Does not flip. Use 2 for old size 16 respawn_pointers
 
 .data
 
@@ -75,6 +77,9 @@ tile_type: .byte 0
 
 ### Other
 is_blue_bot: .word 0
+respawn_direction: .word RESPAWN_FLIPS_DIRECTION	# Upon respawn, this becomes 1. When respawn_direction is 1, the bot
+							# starts the current instruction at respawn_pointers[host_index + 16]
+							# so that it moves in a different direction from the previous respawn
 
 #############
 # Main code #
@@ -466,6 +471,20 @@ respawn_bit_1_0:
 	or	$t0, $t0, $t1			# set bit 1
 	or	$t0, $t0, $t2			# set bit 0
 
+	# flip respawn_direction
+	lw	$t9, respawn_direction
+	beq	$t9, 2, respawn_convert_to_offset	# If equal to 2, don't flip respawn direction and don't add 16
+
+	not	$t9, $t9
+	sw	$t9, respawn_direction
+
+	# if respawn_direction is 1, use second half of respawn_pointers array
+	# (add 16 to host_index). otherwise, use original host_index
+	beq	$zero, $t9, respawn_convert_to_offset
+
+	add	$t0, $t0, 16			# add 16 (use second half of array)
+
+respawn_convert_to_offset:
 	# convert number to offset for the int array (respawn pointers)
 	sll	$t0, $t0, 2			# multiply by 4
 
