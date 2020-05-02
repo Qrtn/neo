@@ -2,7 +2,7 @@
 
 
 # Setting moving velocity
-moving_vel 3
+moving_vel 10
 
 # Main section (executes on initial spawn)
 goto 66 66 1
@@ -135,7 +135,7 @@ end
 
 
 # Setting moving velocity
-moving_vel 3
+moving_vel 10
 
 # Main section (executes on initial spawn)
 goto 66 66 1

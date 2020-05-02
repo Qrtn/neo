@@ -10,7 +10,7 @@ try:
 except IndexError:
     INITIAL_CLOCKWISE = True
 
-MOVING_VEL = 3
+MOVING_VEL = 10
 
 goto_points = [
     (66, 66),
