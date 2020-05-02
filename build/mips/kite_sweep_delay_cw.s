@@ -541,7 +541,7 @@ solve:
 	sw	$s3, 16($sp)
 
 	lw	$s6, num_rows			# Breaks calling conventions
-	lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_lights instead of
+	lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_light instead of
 	lw	$s8, num_colors			# passing in arguments so we can save cycles in the hot loop
 
 	jal	chase_lights
@@ -600,13 +600,92 @@ solve_lookup_top_row_bits:
 	sub	$s3, $t1, 1			# col = num_cols - 1
 
 solve_apply_top_row_for:
-	li	$a0, 0				# arg 0: row = 0
-	move	$a1, $s3			# arg 1: col
 	and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
-
 	sb	$a2, solution($s3)		# solution[col] = action_num
 
-	jal	toggle_light			# toggle_light(last_row, col, action_num)
+### TOGGLE LIGHT
+#jal	toggle_light				# toggle_light(row, col, actions)
+
+    ## Variables corresponding to registers:
+
+    ##
+    ##	  $t6 = tmp_var
+    ##	  $t5 = array_index
+    ##	  $t4 = cond_var
+    ##	  $a3 = board
+    ##	  $s8 = num_colors
+    ##	  $s7 = num_cols
+    ##	  $s6 = num_rows
+    ##	  $a2 = action_num
+    ##	  $s3 = col
+    ##	  $zero = row
+    ##
+	## End aliases
+
+	#lw	$t0, num_rows			# now $s6
+	#lw	$t1, num_cols			# now $s7
+	#lw	$t2, num_colors			# now $s8
+	#la	$t3, puzzle_board		# now $a3
+
+	# assign  $t5 = $a3&[$zero * $s7 + $s3]
+	add	$t5, $s3, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+solve_toggle_light_col_greater_if:
+	blez	$s3, solve_toggle_light_row_less_if
+
+	# assign  $t5 = $a3&[($zero) * $s7 + $s3 - 1]
+	sub	$t5, $s3, 1
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+solve_toggle_light_row_less_if:
+	# assign  $t4 = $s6 - 1
+	addi	$t4, $s6, -1
+	bge	$zero, $t4, solve_toggle_light_col_less_if
+
+	# assign  $t5 = $a3&[($zero + 1) * $s7 + $s3]
+	add	$t5, $s7, $s3
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+solve_toggle_light_col_less_if:
+	# assign  $t4 = $s7 - 1
+	addi	$t4, $s7, -1
+	bge	$s3, $t4, solve_toggle_light_end
+
+	# assign  $t5 = $a3&[($zero) * $s7 + $s3 + 1]
+	addi	$t5, $s3, 1
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+solve_toggle_light_end:
+
+### END TOGGLE LIGHT
 
 	srl	$s0, $s0, $s1			# top_row_bits >>= cell_bit_width
 
@@ -665,9 +744,116 @@ chase_lights_col_for:
 	#rem	$t2, $t2, $s2				# prev_soln %= num_colors (not necessary b/c soln still valid)
 	sb	$t2, solution($t1)			# solution[next_row_index] = prev_soln
 
-	move	$a0, $s3				# arg 0: row
-	move	$a1, $s4				# arg 1: col
-	jal	toggle_light				# toggle_light(row, col, actions)
+#move	$a0, $s3				# arg 0: row
+#move	$a1, $s4				# arg 1: col
+
+### TOGGLE LIGHT
+#jal	toggle_light				# toggle_light(row, col, actions)
+
+    ## Variables corresponding to registers:
+
+    ##
+    ##	  $t6 = tmp_var
+    ##	  $t5 = array_index
+    ##	  $t4 = cond_var
+    ##	  $a3 = board
+    ##	  $s8 = num_colors
+    ##	  $s7 = num_cols
+    ##	  $s6 = num_rows
+    ##	  $a2 = action_num
+    ##	  $s4 = col
+    ##	  $s3 = row
+    ##
+	## End aliases
+
+	#lw	$t0, num_rows			# now $s6
+	#lw	$t1, num_cols			# now $s7
+	#lw	$t2, num_colors			# now $s8
+	#la	$t3, puzzle_board		# now $a3
+
+	# assign  $t5 = $a3&[$s3 * $s7 + $s4]
+	mul	$t5, $s3, $s7
+	add	$t5, $t5, $s4
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+chase_lights_toggle_light_row_greater_if:
+	blez	$s3, chase_lights_toggle_light_col_greater_if
+
+	# assign  $t5 = $a3&[($s3 - 1) * $s7 + $s4]
+	addi	$t5, $s3, -1
+	mul	$t5, $t5, $s7
+	add	$t5, $t5, $s4
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	#lbu	$t6, 0($t5)
+	#add	$t6, $t6, $a2
+	#div	$t6, $s8
+	#mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$zero, 0($t5)
+
+chase_lights_toggle_light_col_greater_if:
+	blez	$s4, chase_lights_toggle_light_row_less_if
+
+	# assign  $t5 = $a3&[($s3) * $s7 + $s4 - 1]
+	mul	$t9, $s3, $s7
+	add	$t9, $t9, $s4
+	addi	$t5, $t9, -1
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+chase_lights_toggle_light_row_less_if:
+	# assign  $t4 = $s6 - 1
+	addi	$t4, $s6, -1
+	bge	$s3, $t4, chase_lights_toggle_light_col_less_if
+
+	# assign  $t5 = $a3&[($s3 + 1) * $s7 + $s4]
+	addi	$t5, $s3, 1
+	mul	$t5, $t5, $s7
+	add	$t5, $t5, $s4
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+chase_lights_toggle_light_col_less_if:
+	# assign  $t4 = $s7 - 1
+	addi	$t4, $s7, -1
+	bge	$s4, $t4, chase_lights_toggle_light_end
+
+	# assign  $t5 = $a3&[($s3) * $s7 + $s4 + 1]
+	mul	$t5, $s3, $s7
+	add	$t5, $t5, $s4
+	addi	$t5, $t5, 1
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
+	lbu	$t6, 0($t5)
+	add	$t6, $t6, $a2
+	div	$t6, $s8
+	mfhi	$t6
+	# assign  $t6 =>:: $t5
+	sb	$t6, 0($t5)
+
+chase_lights_toggle_light_end:
+
+### END TOGGLE LIGHT
 
 chase_lights_col_for_nolight:
 	add	$s5, $s5, 1				# puzzle_index += 1
@@ -690,113 +876,6 @@ chase_lights_row_for_done:
 	lw	$s5, 24($sp)
 	add	$sp, $sp, 28
 
-	jr	$ra
-
-
-.globl toggle_light
-toggle_light:
-    ## Variables corresponding to registers:
-
-    ##
-    ##	  $t6 = tmp_var
-    ##	  $t5 = array_index
-    ##	  $t4 = cond_var
-    ##	  $t3 = board
-    ##	  $t2 = num_colors
-    ##	  $t1 = num_cols
-    ##	  $t0 = num_rows
-    ##	  $a2 = action_num
-    ##	  $a1 = col
-    ##	  $a0 = row
-    ##
-	## End aliases
-
-	#lw	$t0, num_rows			# now $s6
-	#lw	$t1, num_cols			# now $s7
-	#lw	$t2, num_colors			# now $s8
-	#la	$t3, puzzle_board		# now $a3
-
-	# assign  $t5 = $a3&[$a0 * $s7 + $a1]
-	mul	$t5, $a0, $s7
-	add	$t5, $t5, $a1
-	add	$t5, $t5, $a3
-	# assign  $t6 = (*::($t5) + $a2) % $s8
-	lbu	$t6, 0($t5)
-	add	$t6, $t6, $a2
-	div	$t6, $s8
-	mfhi	$t6
-	# assign  $t6 =>:: $t5
-	sb	$t6, 0($t5)
-
-toggle_light_row_greater_if:
-	blez	$a0, toggle_light_col_greater_if
-
-	# assign  $t5 = $a3&[($a0 - 1) * $s7 + $a1]
-	addi	$t5, $a0, -1
-	mul	$t5, $t5, $s7
-	add	$t5, $t5, $a1
-	add	$t5, $t5, $a3
-	# assign  $t6 = (*::($t5) + $a2) % $s8
-	lbu	$t6, 0($t5)
-	add	$t6, $t6, $a2
-	div	$t6, $s8
-	mfhi	$t6
-	# assign  $t6 =>:: $t5
-	sb	$t6, 0($t5)
-
-toggle_light_col_greater_if:
-	blez	$a1, toggle_light_row_less_if
-
-	# assign  $t5 = $a3&[($a0) * $s7 + $a1 - 1]
-	mul	$t9, $a0, $s7
-	add	$t9, $t9, $a1
-	addi	$t5, $t9, -1
-	add	$t5, $t5, $a3
-	# assign  $t6 = (*::($t5) + $a2) % $s8
-	lbu	$t6, 0($t5)
-	add	$t6, $t6, $a2
-	div	$t6, $s8
-	mfhi	$t6
-	# assign  $t6 =>:: $t5
-	sb	$t6, 0($t5)
-
-toggle_light_row_less_if:
-	# assign  $t4 = $s6 - 1
-	addi	$t4, $s6, -1
-	bge	$a0, $t4, toggle_light_col_less_if
-
-	# assign  $t5 = $a3&[($a0 + 1) * $s7 + $a1]
-	addi	$t5, $a0, 1
-	mul	$t5, $t5, $s7
-	add	$t5, $t5, $a1
-	add	$t5, $t5, $a3
-	# assign  $t6 = (*::($t5) + $a2) % $s8
-	lbu	$t6, 0($t5)
-	add	$t6, $t6, $a2
-	div	$t6, $s8
-	mfhi	$t6
-	# assign  $t6 =>:: $t5
-	sb	$t6, 0($t5)
-
-toggle_light_col_less_if:
-	# assign  $t4 = $s7 - 1
-	addi	$t4, $s7, -1
-	bge	$a1, $t4, toggle_light_end
-
-	# assign  $t5 = $a3&[($a0) * $s7 + $a1 + 1]
-	mul	$t5, $a0, $s7
-	add	$t5, $t5, $a1
-	addi	$t5, $t5, 1
-	add	$t5, $t5, $a3
-	# assign  $t6 = (*::($t5) + $a2) % $s8
-	lbu	$t6, 0($t5)
-	add	$t6, $t6, $a2
-	div	$t6, $s8
-	mfhi	$t6
-	# assign  $t6 =>:: $t5
-	sb	$t6, 0($t5)
-
-toggle_light_end:
 	jr	$ra
 
 
