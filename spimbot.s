@@ -1,1 +1,1 @@
-build/mips/kite_red_cw.s
+build/mips/kite_sweep_delay_cw.s
