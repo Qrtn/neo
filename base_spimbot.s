@@ -471,6 +471,7 @@ respawn_bit_1_0:
 
 	lw	$t5, respawn_pointers($t0)	# load in instruction to start at
 
+	sw	$zero, remaining_sweep_delay_cycles	# reset remaining_sweep_delay_cycles so sweep_delay loop doesn't take over
 	sw	$t5, current_move		# set instruction counter
 	sw	$zero, TIMER			# request timer interrupt immediately so timer loop takes over
 
