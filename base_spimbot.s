@@ -540,8 +540,8 @@ solve:
 	sw	$s3, 16($sp)
 
 	lw	$s6, num_rows			# Breaks calling conventions
-	lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_lights
-	lw	$s8, num_colors			# Instead of passing in arguments so we can save cycles in the hot loop
+	lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_lights instead of
+	lw	$s8, num_colors			# passing in arguments so we can save cycles in the hot loop
 
 	jal	chase_lights
 
