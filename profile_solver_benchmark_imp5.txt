@@ -1,0 +1,577 @@
+        1 [0x00400000]	0x8fa40000  lw $4, 0($29)                   ; exceptions.s:183: lw $a0 0($sp)		# argc
+        1 [0x00400004]	0x27a50004  addiu $5, $29, 4                ; exceptions.s:184: addiu $a1 $sp 4		# argv
+        1 [0x00400008]	0x24a60004  addiu $6, $5, 4                 ; exceptions.s:185: addiu $a2 $a1 4		# envp
+        1 [0x0040000c]	0x00041080  sll $2, $4, 2                   ; exceptions.s:186: sll $v0 $a0 2
+        1 [0x00400010]	0x00c23021  addu $6, $6, $2                 ; exceptions.s:187: addu $a2 $a2 $v0
+        1 [0x00400014]	0x0c100009  jal 0x00400024 [main]           ; exceptions.s:188: jal main
+        0 [0x00400018]	0x00000000  nop                             ; exceptions.s:189: nop
+        0 [0x0040001c]	0x3402000a  ori $2, $0, 10                  ; exceptions.s:191: li $v0 10
+        0 [0x00400020]	0x0000000c  syscall                         ; exceptions.s:192: syscall			# syscall 10 (exit)
+        1 [0x00400024]	0x340c0001  ori $12, $0, 1                  ; solver_benchmark_imp5.s:85: li	$t4, 1					# global enable bit
+        1 [0x00400028]	0x358c0800  ori $12, $12, 2048              ; solver_benchmark_imp5.s:86: or	$t4, $t4, REQUEST_PUZZLE_INT_MASK	# puzzle interrupt bit
+        1 [0x0040002c]	0x358c2000  ori $12, $12, 8192              ; solver_benchmark_imp5.s:87: or	$t4, $t4, RESPAWN_INT_MASK		# respawn interrupt bit
+        1 [0x00400030]	0x358c8000  ori $12, $12, -32768            ; solver_benchmark_imp5.s:88: or	$t4, $t4, TIMER_INT_MASK		# timer interrupt bit
+        1 [0x00400034]	0x408c6000  mtc0 $12, $12                   ; solver_benchmark_imp5.s:89: mtc0	$t4, $12
+        1 [0x00400038]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:92: lw	$t0, BOT_X				# Identify if red or blue bot via starting location
+        1 [0x0040003c]	0x8c280020  lw $8, 32($1)
+        1 [0x00400040]	0x340100a0  ori $1, $0, 160                 ; solver_benchmark_imp5.s:93: sgt	$t1, $t0, 160				# true if starting on the right half of the map
+        1 [0x00400044]	0x0028482a  slt $9, $1, $8
+        1 [0x00400048]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:94: sw	$t1, is_blue_bot			# Important for orientation of angle and movement
+        1 [0x0040004c]	0xac290654  sw $9, 1620($1)
+        1 [0x00400050]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:96: sw	$zero, TIMER				# Kick off kernel instruction loop immediately
+        1 [0x00400054]	0xac20001c  sw $0, 28($1)
+        2 [0x00400058]	0x3c011001  lui $1, 4097 [puzzle_board]     ; solver_benchmark_imp5.s:99: la	$a3, puzzle_board			# in the hot loop. These registers will be used in toggle lights
+        1 [0x0040005c]	0x34270664  ori $7, $1, 1636 [puzzle_board]
+        1 [0x00400060]	0x3c011001  lui $1, 4097 [puzzle]           ; solver_benchmark_imp5.s:103: la	$s0, puzzle				# Puzzle address
+        1 [0x00400064]	0x34300658  ori $16, $1, 1624 [puzzle]
+        1 [0x00400068]	0x3c011001  lui $1, 4097 [has_puzzle]       ; solver_benchmark_imp5.s:104: la	$s1, has_puzzle
+        1 [0x0040006c]	0x34310008  ori $17, $1, 8 [has_puzzle]
+        1 [0x00400070]	0x3c011001  lui $1, 4097 [solution]         ; solver_benchmark_imp5.s:105: la	$s2, solution				
+        1 [0x00400074]	0x34320764  ori $18, $1, 1892 [solution]
+        1 [0x00400078]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:107: la	$s3, REQUEST_PUZZLE
+        1 [0x0040007c]	0x343300d0  ori $19, $1, 208
+        1 [0x00400080]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:108: la	$s4, SUBMIT_SOLUTION
+        1 [0x00400084]	0x343400d4  ori $20, $1, 212
+        1 [0x00400088]	0x34150041  ori $21, $0, 65                 ; solver_benchmark_imp5.s:109: la	$s5, MAX_SOLUTION_SIZE
+     1609 [0x0040008c]	0xae700000  sw $16, 0($19)                  ; solver_benchmark_imp5.s:112: sw	$s0, ($s3)				# Request puzzle
+     1609 [0x00400090]	0x34080000  ori $8, $0, 0                   ; solver_benchmark_imp5.s:115: li	$t0, 0					# i = 0
+   104585 [0x00400094]	0x3c011001  lui $1, 4097 [solution]         ; solver_benchmark_imp5.s:118: sb	$zero, solution($t0)			# solution[i] = 0
+   104585 [0x00400098]	0x00280821  addu $1, $1, $8
+   104585 [0x0040009c]	0xa0200764  sb $0, 1892($1) [solution]
+   104585 [0x004000a0]	0x21080001  addi $8, $8, 1                  ; solver_benchmark_imp5.s:120: add	$t0, $t0, 1				# ++i
+   104585 [0x004000a4]	0x1515fffc  bne $8, $21, -16 [main_reset_solution_for-0x004000a4]; solver_benchmark_imp5.s:123: bne	$t0, $s5, main_reset_solution_for
+  2110473 [0x004000a8]	0x8e280000  lw $8, 0($17)                   ; solver_benchmark_imp5.s:128: lw	$t0, ($s1)				# Kernel writes to has_puzzle when puzzle is available
+  2110424 [0x004000ac]	0x1100ffff  beq $8, $0, -4 [main_check_puzzle_available-0x004000ac]; solver_benchmark_imp5.s:129: beq	$t0, $zero, main_check_puzzle_available	# has_puzzle used to communicate between kernel and user
+     1609 [0x004000b0]	0x0c100031  jal 0x004000c4 [solve]          ; solver_benchmark_imp5.s:136: jal	solve					# Call solver
+     1608 [0x004000b4]	0xae920000  sw $18, 0($20)                  ; solver_benchmark_imp5.s:138: sw	$s2, ($s4)				# Submit solution
+     1608 [0x004000b8]	0xae200000  sw $0, 0($17)                   ; solver_benchmark_imp5.s:140: sw	$zero, ($s1)				# Reset has_puzzle
+     1608 [0x004000bc]	0x08100023  j 0x0040008c [main_request_puzzle]; solver_benchmark_imp5.s:142: j	main_request_puzzle			# User-space code requests and solves puzzles forever
+        0 [0x004000c0]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:144: jr	$ra
+     1609 [0x004000c4]	0x23bdffec  addi $29, $29, -20              ; solver_benchmark_imp5.s:536: sub	$sp, $sp, 20
+     1609 [0x004000c8]	0xafbf0000  sw $31, 0($29)                  ; solver_benchmark_imp5.s:537: sw	$ra, 0($sp)
+     1609 [0x004000cc]	0xafb00004  sw $16, 4($29)                  ; solver_benchmark_imp5.s:538: sw	$s0, 4($sp) 
+     1609 [0x004000d0]	0xafb10008  sw $17, 8($29)                  ; solver_benchmark_imp5.s:539: sw	$s1, 8($sp)
+     1609 [0x004000d4]	0xafb2000c  sw $18, 12($29)                 ; solver_benchmark_imp5.s:540: sw	$s2, 12($sp)
+     1609 [0x004000d8]	0xafb30010  sw $19, 16($29)                 ; solver_benchmark_imp5.s:541: sw	$s3, 16($sp)
+     1609 [0x004000dc]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:543: lw	$s6, num_rows			# Breaks calling conventions
+     1609 [0x004000e0]	0x8c360658  lw $22, 1624($1)
+     1609 [0x004000e4]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:544: lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_light instead of
+     1609 [0x004000e8]	0x8c37065c  lw $23, 1628($1)
+     1609 [0x004000ec]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:545: lw	$s8, num_colors			# passing in arguments so we can save cycles in the hot loop
+     1609 [0x004000f0]	0x8c3e0660  lw $30, 1632($1)
+     1609 [0x004000f4]	0x0c100095  jal 0x00400254 [chase_lights]   ; solver_benchmark_imp5.s:547: jal	chase_lights
+     1608 [0x004000f8]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:550: lw	$t0, num_rows
+     1608 [0x004000fc]	0x8c280658  lw $8, 1624($1)
+     1608 [0x00400100]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:551: lw	$t1, num_cols
+     1608 [0x00400104]	0x8c29065c  lw $9, 1628($1)
+     1608 [0x00400108]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:552: lw	$t2, num_colors
+     1608 [0x0040010c]	0x8c2a0660  lw $10, 1632($1)
+     1608 [0x00400110]	0x210bfffb  addi $11, $8, -5                ; solver_benchmark_imp5.s:554: sub	$t3, $t0, 5			# row_bits = num_rows - 5
+     1608 [0x00400114]	0x000b58c0  sll $11, $11, 3                 ; solver_benchmark_imp5.s:555: sll	$t3, $t3, 3			# row_bits <<= 3
+     1608 [0x00400118]	0x212cfffc  addi $12, $9, -4                ; solver_benchmark_imp5.s:557: sub	$t4, $t1, 4			# col_bits = num_cols - 4
+     1608 [0x0040011c]	0x000c6040  sll $12, $12, 1                 ; solver_benchmark_imp5.s:558: sll	$t4, $t4, 1			# col_bits <<= 1
+     1608 [0x00400120]	0x214dfffe  addi $13, $10, -2               ; solver_benchmark_imp5.s:560: sub	$t5, $t2, 2			# color_bits = num_colors - 2
+     1608 [0x00400124]	0x016c7020  add $14, $11, $12               ; solver_benchmark_imp5.s:562: add	$t6, $t3, $t4			# puzzle_dim_bits = row_bits + col_bits
+     1608 [0x00400128]	0x01cd7020  add $14, $14, $13               ; solver_benchmark_imp5.s:563: add	$t6, $t6, $t5			# puzzle_dim_bits += color_bits
+     1608 [0x0040012c]	0x3c011001  lui $1, 4097 [dim_id_table]     ; solver_benchmark_imp5.s:565: lbu	$t8, dim_id_table($t6)		# dimension_id = dim_id_table[puzzle_dim_bits]
+     1608 [0x00400130]	0x002e0821  addu $1, $1, $14
+     1608 [0x00400134]	0x903855e2  lbu $24, 21986($1) [dim_id_table]
+     1608 [0x00400138]	0x2151ffff  addi $17, $10, -1               ; solver_benchmark_imp5.s:568: sub	$s1, $t2, 1			# cell_bit_width = num_colors - 1
+     1608 [0x0040013c]	0x340c0000  ori $12, $0, 0                  ; solver_benchmark_imp5.s:569: li	$t4, 0				# bottom_row_bits = 0 
+     1608 [0x00400140]	0x210dffff  addi $13, $8, -1                ; solver_benchmark_imp5.s:571: sub	$t5, $t0, 1			# index (last row's index) = num_rows - 1
+     1608 [0x00400144]	0x71a96802  mul $13, $13, $9                ; solver_benchmark_imp5.s:572: mul	$t5, $t5, $t1			# index *= num_cols
+     1608 [0x00400148]	0x01a97020  add $14, $13, $9                ; solver_benchmark_imp5.s:574: add	$t6, $t5, $t1			# end_index = index + num_cols
+     6479 [0x0040014c]	0x022c6004  sllv $12, $12, $17              ; solver_benchmark_imp5.s:577: sll	$t4, $t4, $s1			# bottom_row_bits <<= cell_bit_width
+     6479 [0x00400150]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:578: lbu	$t7, puzzle_board($t5)		# state = puzzle_board[index]
+     6479 [0x00400154]	0x002d0821  addu $1, $1, $13
+     6479 [0x00400158]	0x902f0664  lbu $15, 1636($1)
+     6479 [0x0040015c]	0x018f6020  add $12, $12, $15               ; solver_benchmark_imp5.s:579: add	$t4, $t4, $t7			# bottom_row_bits += state
+     6479 [0x00400160]	0x21ad0001  addi $13, $13, 1                ; solver_benchmark_imp5.s:581: add	$t5, $t5, 1			# ++index
+     6479 [0x00400164]	0x15aefffa  bne $13, $14, -24 [solve_encode_bottom_row_for-0x00400164]; solver_benchmark_imp5.s:583: bne	$t5, $t6, solve_encode_bottom_row_for
+     1608 [0x00400168]	0x11800034  beq $12, $0, 208 [solve_return-0x00400168]; solver_benchmark_imp5.s:586: beq	$t4, $zero, solve_return	# check if bottom_row_bits is 0, if so return
+     1519 [0x0040016c]	0x0018c280  sll $24, $24, 10                ; solver_benchmark_imp5.s:589: sll	$t8, $t8, ENCODED_ROW_WIDTH	# puzzle_bits = dimension_id << 8
+     1519 [0x00400170]	0x030cc020  add $24, $24, $12               ; solver_benchmark_imp5.s:590: add	$t8, $t8, $t4			# puzzle_bits += bottom_row_bits
+     1519 [0x00400174]	0x0018c040  sll $24, $24, 1                 ; solver_benchmark_imp5.s:591: sll	$t8, $t8, 1			# puzzle_bits *= 2 (convert to short index)
+     1519 [0x00400178]	0x3c011001  lui $1, 4097 [puzzle_table]     ; solver_benchmark_imp5.s:594: lhu	$s0, puzzle_table($t8)		# top_row_bits = puzzle_table[puzzle_bits]
+     1519 [0x0040017c]	0x00380821  addu $1, $1, $24
+     1519 [0x00400180]	0x943008ac  lhu $16, 2220($1) [puzzle_table]
+     1519 [0x00400184]	0x34120001  ori $18, $0, 1                  ; solver_benchmark_imp5.s:596: li	$s2, 1				# cell_mask = 1
+     1519 [0x00400188]	0x02519025  or $18, $18, $17                ; solver_benchmark_imp5.s:597: or	$s2, $s2, $s1			# cell_mask |= cell_bit_width
+     1519 [0x0040018c]	0x2133ffff  addi $19, $9, -1                ; solver_benchmark_imp5.s:600: sub	$s3, $t1, 1			# col = num_cols - 1
+     6113 [0x00400190]	0x02123024  and $6, $16, $18                ; solver_benchmark_imp5.s:603: and	$a2, $s0, $s2			# arg 2: action_num = top_row_bits & cell_mask
+     6113 [0x00400194]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:604: sb	$a2, solution($s3)		# solution[col] = action_num
+     6113 [0x00400198]	0x00330821  addu $1, $1, $19
+     6113 [0x0040019c]	0xa0260764  sb $6, 1892($1)
+     6113 [0x004001a0]	0x02676820  add $13, $19, $7                ; solver_benchmark_imp5.s:631: add	$t5, $s3, $a3
+     6113 [0x004001a4]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:633: lbu	$t6, 0($t5)
+     6113 [0x004001a8]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:634: add	$t6, $t6, $a2
+     6113 [0x004001ac]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:635: div	$t6, $s8
+     6113 [0x004001b0]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:636: mfhi	$t6
+     6113 [0x004001b4]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:638: sb	$t6, 0($t5)
+     6113 [0x004001b8]	0x1a600008  blez $19 32 [solve_toggle_light_row_less_if-0x004001b8]; solver_benchmark_imp5.s:641: blez	$s3, solve_toggle_light_row_less_if
+     4594 [0x004001bc]	0x226dffff  addi $13, $19, -1               ; solver_benchmark_imp5.s:644: sub	$t5, $s3, 1
+     4594 [0x004001c0]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:645: add	$t5, $t5, $a3
+     4594 [0x004001c4]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:647: lbu	$t6, 0($t5)
+     4594 [0x004001c8]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:648: add	$t6, $t6, $a2
+     4594 [0x004001cc]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:649: div	$t6, $s8
+     4594 [0x004001d0]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:650: mfhi	$t6
+     4594 [0x004001d4]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:652: sb	$t6, 0($t5)
+     6113 [0x004001d8]	0x22ccffff  addi $12, $22, -1               ; solver_benchmark_imp5.s:656: addi	$t4, $s6, -1
+     6113 [0x004001dc]	0x000c082a  slt $1, $0, $12                 ; solver_benchmark_imp5.s:657: bge	$zero, $t4, solve_toggle_light_col_less_if
+     6113 [0x004001e0]	0x10200008  beq $1, $0, 32 [solve_toggle_light_col_less_if-0x004001e0]
+     6113 [0x004001e4]	0x02f36820  add $13, $23, $19               ; solver_benchmark_imp5.s:660: add	$t5, $s7, $s3
+     6113 [0x004001e8]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:661: add	$t5, $t5, $a3
+     6113 [0x004001ec]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:663: lbu	$t6, 0($t5)
+     6113 [0x004001f0]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:664: add	$t6, $t6, $a2
+     6113 [0x004001f4]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:665: div	$t6, $s8
+     6113 [0x004001f8]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:666: mfhi	$t6
+     6113 [0x004001fc]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:668: sb	$t6, 0($t5)
+     6113 [0x00400200]	0x22ecffff  addi $12, $23, -1               ; solver_benchmark_imp5.s:672: addi	$t4, $s7, -1
+     6113 [0x00400204]	0x026c082a  slt $1, $19, $12                ; solver_benchmark_imp5.s:673: bge	$s3, $t4, solve_toggle_light_end
+     6113 [0x00400208]	0x10200008  beq $1, $0, 32 [solve_toggle_light_end-0x00400208]
+     4594 [0x0040020c]	0x226d0001  addi $13, $19, 1                ; solver_benchmark_imp5.s:676: addi	$t5, $s3, 1
+     4594 [0x00400210]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:677: add	$t5, $t5, $a3
+     4594 [0x00400214]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:679: lbu	$t6, 0($t5)
+     4594 [0x00400218]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:680: add	$t6, $t6, $a2
+     4594 [0x0040021c]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:681: div	$t6, $s8
+     4594 [0x00400220]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:682: mfhi	$t6
+     4594 [0x00400224]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:684: sb	$t6, 0($t5)
+     6113 [0x00400228]	0x02308006  srlv $16, $16, $17              ; solver_benchmark_imp5.s:690: srl	$s0, $s0, $s1			# top_row_bits >>= cell_bit_width
+     6113 [0x0040022c]	0x2273ffff  addi $19, $19, -1               ; solver_benchmark_imp5.s:692: sub	$s3, $s3, 1			# --col
+     6113 [0x00400230]	0x0661ffd8  bgez $19 -160 [solve_apply_top_row_for-0x00400230]; solver_benchmark_imp5.s:694: bgez	$s3, solve_apply_top_row_for
+     1519 [0x00400234]	0x0c100095  jal 0x00400254 [chase_lights]   ; solver_benchmark_imp5.s:697: jal	chase_lights
+     1608 [0x00400238]	0x8fbf0000  lw $31, 0($29)                  ; solver_benchmark_imp5.s:700: lw	$ra, 0($sp)
+     1608 [0x0040023c]	0x8fb00004  lw $16, 4($29)                  ; solver_benchmark_imp5.s:701: lw	$s0, 4($sp) 
+     1608 [0x00400240]	0x8fb10008  lw $17, 8($29)                  ; solver_benchmark_imp5.s:702: lw	$s1, 8($sp)
+     1608 [0x00400244]	0x8fb2000c  lw $18, 12($29)                 ; solver_benchmark_imp5.s:703: lw	$s2, 12($sp)
+     1608 [0x00400248]	0x8fb30010  lw $19, 16($29)                 ; solver_benchmark_imp5.s:704: lw	$s3, 16($sp)
+     1608 [0x0040024c]	0x23bd0014  addi $29, $29, 20               ; solver_benchmark_imp5.s:705: add	$sp, $sp, 20
+     1608 [0x00400250]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:707: jr	$ra
+     3128 [0x00400254]	0x23bdffe4  addi $29, $29, -28              ; solver_benchmark_imp5.s:712: sub	$sp, $sp, 28
+     3128 [0x00400258]	0xafbf0000  sw $31, 0($29)                  ; solver_benchmark_imp5.s:713: sw	$ra, 0($sp)
+     3128 [0x0040025c]	0xafb00004  sw $16, 4($29)                  ; solver_benchmark_imp5.s:714: sw	$s0, 4($sp) 
+     3128 [0x00400260]	0xafb10008  sw $17, 8($29)                  ; solver_benchmark_imp5.s:715: sw	$s1, 8($sp)
+     3128 [0x00400264]	0xafb2000c  sw $18, 12($29)                 ; solver_benchmark_imp5.s:716: sw	$s2, 12($sp)
+     3128 [0x00400268]	0xafb30010  sw $19, 16($29)                 ; solver_benchmark_imp5.s:717: sw	$s3, 16($sp)
+     3128 [0x0040026c]	0xafb40014  sw $20, 20($29)                 ; solver_benchmark_imp5.s:718: sw	$s4, 20($sp)
+     3128 [0x00400270]	0xafb50018  sw $21, 24($29)                 ; solver_benchmark_imp5.s:719: sw	$s5, 24($sp)
+     3128 [0x00400274]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:721: lw	$s0, num_rows				# load num_rows
+     3128 [0x00400278]	0x8c300658  lw $16, 1624($1)
+     3128 [0x0040027c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:722: lw	$s1, num_cols				# load num_cols
+     3128 [0x00400280]	0x8c31065c  lw $17, 1628($1)
+     3128 [0x00400284]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:723: lw	$s2, num_colors				# load num_colors
+     3128 [0x00400288]	0x8c320660  lw $18, 1632($1)
+     3128 [0x0040028c]	0x34150000  ori $21, $0, 0                  ; solver_benchmark_imp5.s:725: li	$s5, 0					# puzzle_index = 0
+     3128 [0x00400290]	0x34130001  ori $19, $0, 1                  ; solver_benchmark_imp5.s:727: li	$s3, 1					# row = 1
+    33920 [0x00400294]	0x34140000  ori $20, $0, 0                  ; solver_benchmark_imp5.s:731: li	$s4, 0					# col = 0
+   133822 [0x00400298]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:735: lbu	$t0, puzzle_board($s5)			# state = puzzle_board[puzzle_index]
+   133822 [0x0040029c]	0x00350821  addu $1, $1, $21
+   133822 [0x004002a0]	0x90280664  lbu $8, 1636($1)
+   133822 [0x004002a4]	0x1100003a  beq $8, $0, 232 [chase_lights_col_for_nolight-0x004002a4]; solver_benchmark_imp5.s:736: beq	$t0, $zero, chase_lights_col_for_nolight# if (state == 0) skip toggle light
+    71451 [0x004002a8]	0x02483022  sub $6, $18, $8                 ; solver_benchmark_imp5.s:738: sub	$a2, $s2, $t0				# arg 2: actions = num_colors - state
+    71451 [0x004002ac]	0x02b14820  add $9, $21, $17                ; solver_benchmark_imp5.s:740: add	$t1, $s5, $s1				# next_row_index = puzzle_index + num_cols
+    71451 [0x004002b0]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:742: lbu	$t2, solution($t1)			# prev_soln = solution[next_row_index]
+    71451 [0x004002b4]	0x00290821  addu $1, $1, $9
+    71451 [0x004002b8]	0x902a0764  lbu $10, 1892($1)
+    71451 [0x004002bc]	0x01465020  add $10, $10, $6                ; solver_benchmark_imp5.s:743: add	$t2, $t2, $a2				# prev_soln += actions
+    71451 [0x004002c0]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:745: sb	$t2, solution($t1)			# solution[next_row_index] = prev_soln
+    71451 [0x004002c4]	0x00290821  addu $1, $1, $9
+    71451 [0x004002c8]	0xa02a0764  sb $10, 1892($1)
+    71451 [0x004002cc]	0x72776802  mul $13, $19, $23               ; solver_benchmark_imp5.s:775: mul	$t5, $s3, $s7
+    71451 [0x004002d0]	0x01b46820  add $13, $13, $20               ; solver_benchmark_imp5.s:776: add	$t5, $t5, $s4
+    71451 [0x004002d4]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:777: add	$t5, $t5, $a3
+    71451 [0x004002d8]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:779: lbu	$t6, 0($t5)
+    71451 [0x004002dc]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:780: add	$t6, $t6, $a2
+    71451 [0x004002e0]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:781: div	$t6, $s8
+    71451 [0x004002e4]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:782: mfhi	$t6
+    71451 [0x004002e8]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:784: sb	$t6, 0($t5)
+    71451 [0x004002ec]	0x1a600006  blez $19 24 [chase_lights_toggle_light_col_greater_if-0x004002ec]; solver_benchmark_imp5.s:787: blez	$s3, chase_lights_toggle_light_col_greater_if
+    71451 [0x004002f0]	0x226dffff  addi $13, $19, -1               ; solver_benchmark_imp5.s:790: addi	$t5, $s3, -1
+    71451 [0x004002f4]	0x71b76802  mul $13, $13, $23               ; solver_benchmark_imp5.s:791: mul	$t5, $t5, $s7
+    71451 [0x004002f8]	0x01b46820  add $13, $13, $20               ; solver_benchmark_imp5.s:792: add	$t5, $t5, $s4
+    71451 [0x004002fc]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:793: add	$t5, $t5, $a3
+    71451 [0x00400300]	0xa1a00000  sb $0, 0($13)                   ; solver_benchmark_imp5.s:800: sb	$zero, 0($t5)
+    71451 [0x00400304]	0x1a80000a  blez $20 40 [chase_lights_toggle_light_row_less_if-0x00400304]; solver_benchmark_imp5.s:803: blez	$s4, chase_lights_toggle_light_row_less_if
+    52674 [0x00400308]	0x7277c802  mul $25, $19, $23               ; solver_benchmark_imp5.s:806: mul	$t9, $s3, $s7
+    52674 [0x0040030c]	0x0334c820  add $25, $25, $20               ; solver_benchmark_imp5.s:807: add	$t9, $t9, $s4
+    52674 [0x00400310]	0x232dffff  addi $13, $25, -1               ; solver_benchmark_imp5.s:808: addi	$t5, $t9, -1
+    52674 [0x00400314]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:809: add	$t5, $t5, $a3
+    52674 [0x00400318]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:811: lbu	$t6, 0($t5)
+    52674 [0x0040031c]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:812: add	$t6, $t6, $a2
+    52674 [0x00400320]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:813: div	$t6, $s8
+    52674 [0x00400324]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:814: mfhi	$t6
+    52674 [0x00400328]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:816: sb	$t6, 0($t5)
+    71451 [0x0040032c]	0x22ccffff  addi $12, $22, -1               ; solver_benchmark_imp5.s:820: addi	$t4, $s6, -1
+    71451 [0x00400330]	0x026c082a  slt $1, $19, $12                ; solver_benchmark_imp5.s:821: bge	$s3, $t4, chase_lights_toggle_light_col_less_if
+    71451 [0x00400334]	0x1020000a  beq $1, $0, 40 [chase_lights_toggle_light_col_less_if-0x00400334]
+    64768 [0x00400338]	0x226d0001  addi $13, $19, 1                ; solver_benchmark_imp5.s:824: addi	$t5, $s3, 1
+    64768 [0x0040033c]	0x71b76802  mul $13, $13, $23               ; solver_benchmark_imp5.s:825: mul	$t5, $t5, $s7
+    64768 [0x00400340]	0x01b46820  add $13, $13, $20               ; solver_benchmark_imp5.s:826: add	$t5, $t5, $s4
+    64768 [0x00400344]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:827: add	$t5, $t5, $a3
+    64768 [0x00400348]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:829: lbu	$t6, 0($t5)
+    64768 [0x0040034c]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:830: add	$t6, $t6, $a2
+    64768 [0x00400350]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:831: div	$t6, $s8
+    64768 [0x00400354]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:832: mfhi	$t6
+    64768 [0x00400358]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:834: sb	$t6, 0($t5)
+    71450 [0x0040035c]	0x22ecffff  addi $12, $23, -1               ; solver_benchmark_imp5.s:838: addi	$t4, $s7, -1
+    71450 [0x00400360]	0x028c082a  slt $1, $20, $12                ; solver_benchmark_imp5.s:839: bge	$s4, $t4, chase_lights_toggle_light_end
+    71450 [0x00400364]	0x1020000a  beq $1, $0, 40 [chase_lights_toggle_light_end-0x00400364]
+    52799 [0x00400368]	0x72776802  mul $13, $19, $23               ; solver_benchmark_imp5.s:842: mul	$t5, $s3, $s7
+    52799 [0x0040036c]	0x01b46820  add $13, $13, $20               ; solver_benchmark_imp5.s:843: add	$t5, $t5, $s4
+    52799 [0x00400370]	0x21ad0001  addi $13, $13, 1                ; solver_benchmark_imp5.s:844: addi	$t5, $t5, 1
+    52799 [0x00400374]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:845: add	$t5, $t5, $a3
+    52799 [0x00400378]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:847: lbu	$t6, 0($t5)
+    52799 [0x0040037c]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:848: add	$t6, $t6, $a2
+    52799 [0x00400380]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:849: div	$t6, $s8
+    52799 [0x00400384]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:850: mfhi	$t6
+    52799 [0x00400388]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:852: sb	$t6, 0($t5)
+   133821 [0x0040038c]	0x22b50001  addi $21, $21, 1                ; solver_benchmark_imp5.s:859: add	$s5, $s5, 1				# puzzle_index += 1
+   133821 [0x00400390]	0x22940001  addi $20, $20, 1                ; solver_benchmark_imp5.s:860: add	$s4, $s4, 1				# col += 1
+   133821 [0x00400394]	0x1691ffc1  bne $20, $17, -252 [chase_lights_col_for-0x00400394]; solver_benchmark_imp5.s:862: bne	$s4, $s1, chase_lights_col_for
+    33919 [0x00400398]	0x22730001  addi $19, $19, 1                ; solver_benchmark_imp5.s:865: add	$s3, $s3, 1				# row += 1
+    33919 [0x0040039c]	0x1670ffbe  bne $19, $16, -264 [chase_lights_row_for-0x0040039c]; solver_benchmark_imp5.s:867: bne	$s3, $s0, chase_lights_row_for
+     3127 [0x004003a0]	0x8fbf0000  lw $31, 0($29)                  ; solver_benchmark_imp5.s:870: lw	$ra, 0($sp)
+     3127 [0x004003a4]	0x8fb00004  lw $16, 4($29)                  ; solver_benchmark_imp5.s:871: lw	$s0, 4($sp)
+     3127 [0x004003a8]	0x8fb10008  lw $17, 8($29)                  ; solver_benchmark_imp5.s:872: lw	$s1, 8($sp)
+     3127 [0x004003ac]	0x8fb2000c  lw $18, 12($29)                 ; solver_benchmark_imp5.s:873: lw	$s2, 12($sp)
+     3127 [0x004003b0]	0x8fb30010  lw $19, 16($29)                 ; solver_benchmark_imp5.s:874: lw	$s3, 16($sp)
+     3127 [0x004003b4]	0x8fb40014  lw $20, 20($29)                 ; solver_benchmark_imp5.s:875: lw	$s4, 20($sp)
+     3127 [0x004003b8]	0x8fb50018  lw $21, 24($29)                 ; solver_benchmark_imp5.s:876: lw	$s5, 24($sp)
+     3127 [0x004003bc]	0x23bd001c  addi $29, $29, 28               ; solver_benchmark_imp5.s:877: add	$sp, $sp, 28
+     3127 [0x004003c0]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:879: jr	$ra
+        0 [0x004003c4]	0x70976802  mul $13, $4, $23                ; solver_benchmark_imp5.s:906: mul	$t5, $a0, $s7
+        0 [0x004003c8]	0x01a56820  add $13, $13, $5                ; solver_benchmark_imp5.s:907: add	$t5, $t5, $a1
+        0 [0x004003cc]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:908: add	$t5, $t5, $a3
+        0 [0x004003d0]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:910: lbu	$t6, 0($t5)
+        0 [0x004003d4]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:911: add	$t6, $t6, $a2
+        0 [0x004003d8]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:912: div	$t6, $s8
+        0 [0x004003dc]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:913: mfhi	$t6
+        0 [0x004003e0]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:915: sb	$t6, 0($t5)
+        0 [0x004003e4]	0x18800006  blez $4 24 [toggle_light_col_greater_if-0x004003e4]; solver_benchmark_imp5.s:918: blez	$a0, toggle_light_col_greater_if
+        0 [0x004003e8]	0x208dffff  addi $13, $4, -1                ; solver_benchmark_imp5.s:921: addi	$t5, $a0, -1
+        0 [0x004003ec]	0x71b76802  mul $13, $13, $23               ; solver_benchmark_imp5.s:922: mul	$t5, $t5, $s7
+        0 [0x004003f0]	0x01a56820  add $13, $13, $5                ; solver_benchmark_imp5.s:923: add	$t5, $t5, $a1
+        0 [0x004003f4]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:924: add	$t5, $t5, $a3
+        0 [0x004003f8]	0xa1a00000  sb $0, 0($13)                   ; solver_benchmark_imp5.s:931: sb	$zero, 0($t5)
+        0 [0x004003fc]	0x18a0000a  blez $5 40 [toggle_light_row_less_if-0x004003fc]; solver_benchmark_imp5.s:934: blez	$a1, toggle_light_row_less_if
+        0 [0x00400400]	0x7097c802  mul $25, $4, $23                ; solver_benchmark_imp5.s:937: mul	$t9, $a0, $s7
+        0 [0x00400404]	0x0325c820  add $25, $25, $5                ; solver_benchmark_imp5.s:938: add	$t9, $t9, $a1
+        0 [0x00400408]	0x232dffff  addi $13, $25, -1               ; solver_benchmark_imp5.s:939: addi	$t5, $t9, -1
+        0 [0x0040040c]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:940: add	$t5, $t5, $a3
+        0 [0x00400410]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:942: lbu	$t6, 0($t5)
+        0 [0x00400414]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:943: add	$t6, $t6, $a2
+        0 [0x00400418]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:944: div	$t6, $s8
+        0 [0x0040041c]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:945: mfhi	$t6
+        0 [0x00400420]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:947: sb	$t6, 0($t5)
+        0 [0x00400424]	0x22ccffff  addi $12, $22, -1               ; solver_benchmark_imp5.s:951: addi	$t4, $s6, -1
+        0 [0x00400428]	0x008c082a  slt $1, $4, $12                 ; solver_benchmark_imp5.s:952: bge	$a0, $t4, toggle_light_col_less_if
+        0 [0x0040042c]	0x1020000a  beq $1, $0, 40 [toggle_light_col_less_if-0x0040042c]
+        0 [0x00400430]	0x208d0001  addi $13, $4, 1                 ; solver_benchmark_imp5.s:955: addi	$t5, $a0, 1
+        0 [0x00400434]	0x71b76802  mul $13, $13, $23               ; solver_benchmark_imp5.s:956: mul	$t5, $t5, $s7
+        0 [0x00400438]	0x01a56820  add $13, $13, $5                ; solver_benchmark_imp5.s:957: add	$t5, $t5, $a1
+        0 [0x0040043c]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:958: add	$t5, $t5, $a3
+        0 [0x00400440]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:960: lbu	$t6, 0($t5)
+        0 [0x00400444]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:961: add	$t6, $t6, $a2
+        0 [0x00400448]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:962: div	$t6, $s8
+        0 [0x0040044c]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:963: mfhi	$t6
+        0 [0x00400450]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:965: sb	$t6, 0($t5)
+        0 [0x00400454]	0x22ecffff  addi $12, $23, -1               ; solver_benchmark_imp5.s:969: addi	$t4, $s7, -1
+        0 [0x00400458]	0x00ac082a  slt $1, $5, $12                 ; solver_benchmark_imp5.s:970: bge	$a1, $t4, toggle_light_end
+        0 [0x0040045c]	0x1020000a  beq $1, $0, 40 [toggle_light_end-0x0040045c]
+        0 [0x00400460]	0x70976802  mul $13, $4, $23                ; solver_benchmark_imp5.s:973: mul	$t5, $a0, $s7
+        0 [0x00400464]	0x01a56820  add $13, $13, $5                ; solver_benchmark_imp5.s:974: add	$t5, $t5, $a1
+        0 [0x00400468]	0x21ad0001  addi $13, $13, 1                ; solver_benchmark_imp5.s:975: addi	$t5, $t5, 1
+        0 [0x0040046c]	0x01a76820  add $13, $13, $7                ; solver_benchmark_imp5.s:976: add	$t5, $t5, $a3
+        0 [0x00400470]	0x91ae0000  lbu $14, 0($13)                 ; solver_benchmark_imp5.s:978: lbu	$t6, 0($t5)
+        0 [0x00400474]	0x01c67020  add $14, $14, $6                ; solver_benchmark_imp5.s:979: add	$t6, $t6, $a2
+        0 [0x00400478]	0x01de001a  div $14, $30                    ; solver_benchmark_imp5.s:980: div	$t6, $s8
+        0 [0x0040047c]	0x00007010  mfhi $14                        ; solver_benchmark_imp5.s:981: mfhi	$t6
+        0 [0x00400480]	0xa1ae0000  sb $14, 0($13)                  ; solver_benchmark_imp5.s:983: sb	$t6, 0($t5)
+        0 [0x00400484]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:986: jr	$ra
+
+
+kernel text segment
+
+     1610 [0x80000180]	0x0001d821  addu $27, $0, $1                ; solver_benchmark_imp5.s:157: move	$k1, $at			# Save $at
+     1610 [0x80000184]	0x3c019000  lui $1, -28672 [chunkIH]        ; solver_benchmark_imp5.s:160: la	$k0, chunkIH
+     1610 [0x80000188]	0x343a0208  ori $26, $1, 520 [chunkIH]
+     1610 [0x8000018c]	0xaf440000  sw $4, 0($26)                   ; solver_benchmark_imp5.s:161: sw	$a0, 0($k0)			# Get some free registers
+     1610 [0x80000190]	0xaf420004  sw $2, 4($26)                   ; solver_benchmark_imp5.s:162: sw	$v0, 4($k0)			# by storing them to a global variable
+     1610 [0x80000194]	0xaf480008  sw $8, 8($26)                   ; solver_benchmark_imp5.s:163: sw	$t0, 8($k0)
+     1610 [0x80000198]	0xaf49000c  sw $9, 12($26)                  ; solver_benchmark_imp5.s:164: sw	$t1, 12($k0)
+     1610 [0x8000019c]	0xaf4a0010  sw $10, 16($26)                 ; solver_benchmark_imp5.s:165: sw	$t2, 16($k0)
+     1610 [0x800001a0]	0xaf4b0014  sw $11, 20($26)                 ; solver_benchmark_imp5.s:166: sw	$t3, 20($k0)
+     1610 [0x800001a4]	0xaf4c0018  sw $12, 24($26)                 ; solver_benchmark_imp5.s:167: sw	$t4, 24($k0)
+     1610 [0x800001a8]	0xaf4d001c  sw $13, 28($26)                 ; solver_benchmark_imp5.s:168: sw	$t5, 28($k0)
+     1610 [0x800001ac]	0xaf4e0020  sw $14, 32($26)                 ; solver_benchmark_imp5.s:169: sw	$t6, 32($k0)
+     1610 [0x800001b0]	0xaf4f0024  sw $15, 36($26)                 ; solver_benchmark_imp5.s:170: sw	$t7, 36($k0)
+     1610 [0x800001b4]	0xaf580028  sw $24, 40($26)                 ; solver_benchmark_imp5.s:171: sw	$t8, 40($k0)
+     1610 [0x800001b8]	0xaf59002c  sw $25, 44($26)                 ; solver_benchmark_imp5.s:172: sw	$t9, 44($k0)
+     1610 [0x800001bc]	0xaf5f0030  sw $31, 48($26)                 ; solver_benchmark_imp5.s:173: sw	$ra, 48($k0)
+     1610 [0x800001c0]	0x00004010  mfhi $8                         ; solver_benchmark_imp5.s:178: mfhi	$t0
+     1610 [0x800001c4]	0xaf480034  sw $8, 52($26)                  ; solver_benchmark_imp5.s:179: sw	$t0, 52($k0)
+     1610 [0x800001c8]	0x00004012  mflo $8                         ; solver_benchmark_imp5.s:180: mflo	$t0
+     1610 [0x800001cc]	0xaf480038  sw $8, 56($26)                  ; solver_benchmark_imp5.s:181: sw	$t0, 56($k0)
+     1610 [0x800001d0]	0x401a6800  mfc0 $26, $13                   ; solver_benchmark_imp5.s:183: mfc0	$k0, $13			# Get Cause register
+     1610 [0x800001d4]	0x001a2082  srl $4, $26, 2                  ; solver_benchmark_imp5.s:184: srl	$a0, $k0, 2
+     1610 [0x800001d8]	0x3084000f  andi $4, $4, 15                 ; solver_benchmark_imp5.s:185: and	$a0, $a0, 0xf			# ExcCode field
+     1610 [0x800001dc]	0x140400eb  bne $0, $4, 940 [non_intrpt-0x800001dc]; solver_benchmark_imp5.s:186: bne	$a0, 0, non_intrpt
+     3220 [0x800001e0]	0x401a6800  mfc0 $26, $13                   ; solver_benchmark_imp5.s:189: mfc0	$k0, $13			# Get Cause register, again
+     3220 [0x800001e4]	0x101a00ed  beq $0, $26, 948 [done-0x800001e4]; solver_benchmark_imp5.s:190: beq	$k0, 0, done			# handled all outstanding interrupts
+     1610 [0x800001e8]	0x33448000  andi $4, $26, -32768            ; solver_benchmark_imp5.s:192: and	$a0, $k0, TIMER_INT_MASK	# is there a timer interrupt?
+     1610 [0x800001ec]	0x1404000a  bne $0, $4, 40 [timer_interrupt-0x800001ec]; solver_benchmark_imp5.s:193: bne	$a0, 0, timer_interrupt
+     1609 [0x800001f0]	0x33440800  andi $4, $26, 2048              ; solver_benchmark_imp5.s:195: and	$a0, $k0, REQUEST_PUZZLE_INT_MASK
+     1609 [0x800001f4]	0x140400ad  bne $0, $4, 692 [request_puzzle_interrupt-0x800001f4]; solver_benchmark_imp5.s:196: bne	$a0, 0, request_puzzle_interrupt
+        0 [0x800001f8]	0x33442000  andi $4, $26, 8192              ; solver_benchmark_imp5.s:198: and	$a0, $k0, RESPAWN_INT_MASK
+        0 [0x800001fc]	0x140400b2  bne $0, $4, 712 [respawn_interrupt-0x800001fc]; solver_benchmark_imp5.s:199: bne	$a0, 0, respawn_interrupt
+        0 [0x80000200]	0x34020004  ori $2, $0, 4                   ; solver_benchmark_imp5.s:201: li	$v0, PRINT_STRING		# Unhandled interrupt types
+        0 [0x80000204]	0x3c019000  lui $1, -28672 [unhandled_str]  ; solver_benchmark_imp5.s:202: la	$a0, unhandled_str
+        0 [0x80000208]	0x34240271  ori $4, $1, 625 [unhandled_str]
+        0 [0x8000020c]	0x0000000c  syscall                         ; solver_benchmark_imp5.s:203: syscall
+        0 [0x80000210]	0x08000166  j 0x00000598 [done]             ; solver_benchmark_imp5.s:204: j	done
+        1 [0x80000214]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:218: sw	$zero, TIMER_ACK
+        1 [0x80000218]	0xac20006c  sw $0, 108($1)
+        1 [0x8000021c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:220: lw	$t9, remaining_sweep_delay_cycles	# load # of sweep delay cycles left
+        1 [0x80000220]	0x8c390004  lw $25, 4($1)
+        1 [0x80000224]	0x2b210385  slti $1, $25, 901               ; solver_benchmark_imp5.s:222: ble	$t9, SWEEP_SHOOT_CYCLES, finish_sweep_delay_cycles
+        1 [0x80000228]	0x1420001c  bne $1, $0, 112 [finish_sweep_delay_cycles-0x80000228]
+        0 [0x8000022c]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:224: lw	$t1, ANGLE			# store current angle
+        0 [0x80000230]	0x8c290014  lw $9, 20($1)
+        0 [0x80000234]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:225: lw	$t8, VELOCITY			# store current velocity
+        0 [0x80000238]	0x8c380010  lw $24, 16($1)
+        0 [0x8000023c]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:226: sw	$zero, VELOCITY			# stop moving
+        0 [0x80000240]	0xac200010  sw $0, 16($1)
+        0 [0x80000244]	0x0c0000e0  jal 0x00000380 [execute_sweep_shoot_during_delay]; solver_benchmark_imp5.s:228: jal	execute_sweep_shoot_during_delay	# we don't follow calling conventions here ;) execute_sweep_shoot... uses $t2 through $t7
+        0 [0x80000248]	0x340b7530  ori $11, $0, 30000              ; solver_benchmark_imp5.s:230: li	$t3, SWEEP_DELAY_INTERVAL	# load sweep delay interval (# of cycles in between sweeps in the middle of a sweep_delay)
+        0 [0x8000024c]	0x0179082a  slt $1, $11, $25                ; solver_benchmark_imp5.s:231: blt	$t3, $t9, store_delay		# if sweep delay interval less than # of remaining cycles store that directly
+        0 [0x80000250]	0x14200002  bne $1, $0, 8 [store_delay-0x80000250]
+        0 [0x80000254]	0x00195821  addu $11, $0, $25               ; solver_benchmark_imp5.s:233: move	$t3, $t9			# otherwise store # of remaining cycles in sweep_delay
+        0 [0x80000258]	0x032bc822  sub $25, $25, $11               ; solver_benchmark_imp5.s:236: sub	$t9, $t9, $t3			# update remaining sweep delay cycles
+        0 [0x8000025c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:237: sw	$t9, remaining_sweep_delay_cycles	# store
+        0 [0x80000260]	0xac390004  sw $25, 4($1)
+        0 [0x80000264]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:240: lw	$t4, TIMER			# get current cycle
+        0 [0x80000268]	0x8c2c001c  lw $12, 28($1)
+        0 [0x8000026c]	0x018b6020  add $12, $12, $11               ; solver_benchmark_imp5.s:241: add	$t4, $t4, $t3			# next timer intrpt at current cycle + either interval delay or remaining sweep delay cycles
+        0 [0x80000270]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:243: sw	$t4, TIMER			# request timer interrupt
+        0 [0x80000274]	0xac2c001c  sw $12, 28($1)
+        0 [0x80000278]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:245: sw	$t8, VELOCITY			# restore previous velocity
+        0 [0x8000027c]	0xac380010  sw $24, 16($1)
+        0 [0x80000280]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:246: sw	$t1, ANGLE			# restore previous angle
+        0 [0x80000284]	0xac290014  sw $9, 20($1)
+        0 [0x80000288]	0x34090001  ori $9, $0, 1                   ; solver_benchmark_imp5.s:247: li	$t1, 1
+        0 [0x8000028c]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:248: sw	$t1, ANGLE_CONTROL		# restore previous angle ("absolute")
+        0 [0x80000290]	0xac290018  sw $9, 24($1)
+        0 [0x80000294]	0x08000078  j 0x000001e0 [interrupt_dispatch]; solver_benchmark_imp5.s:250: j	interrupt_dispatch		# return control
+        1 [0x80000298]	0x2339fffe  addi $25, $25, -2               ; solver_benchmark_imp5.s:253: sub	$t9, $t9, 2			# finish out the remaining sweep delay cycles doing nothing while we are moving
+        1 [0x8000029c]	0x1f20ffff  bgtz $25 -4 [finish_sweep_delay_cycles-0x8000029c]; solver_benchmark_imp5.s:254: bgtz	$t9, finish_sweep_delay_cycles
+        1 [0x800002a0]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:257: lw	$t0, current_move		# load instruction counter
+        1 [0x800002a4]	0x8c280000  lw $8, 0($1)
+        1 [0x800002a8]	0x3c011001  lui $1, 4097 [movement]         ; solver_benchmark_imp5.s:261: lw	$t1, movement($t0)		# load instruction
+        1 [0x800002ac]	0x00280821  addu $1, $1, $8
+        1 [0x800002b0]	0x8c290864  lw $9, 2148($1) [movement]
+        1 [0x800002b4]	0x21080004  addi $8, $8, 4                  ; solver_benchmark_imp5.s:263: add	$t0, $t0, 4			# increment instruction counter
+        1 [0x800002b8]	0x292103e8  slti $1, $9, 1000               ; solver_benchmark_imp5.s:266: blt	$t1, 1000, execute_angle	# branches to appropriate instruction handler
+        1 [0x800002bc]	0x14200017  bne $1, $0, 92 [execute_angle-0x800002bc]
+        1 [0x800002c0]	0x292107d0  slti $1, $9, 2000               ; solver_benchmark_imp5.s:267: blt	$t1, 2000, execute_velocity	# depending on range of instruction (think of it like a weird
+        1 [0x800002c4]	0x1420001f  bne $1, $0, 124 [execute_velocity-0x800002c4]
+        1 [0x800002c8]	0x340107d0  ori $1, $0, 2000                ; solver_benchmark_imp5.s:268: beq	$t1, 2000, execute_udp		# opcode that works with integer ranges instead of bits)
+        1 [0x800002cc]	0x10290021  beq $1, $9, 132 [execute_udp-0x800002cc]
+        1 [0x800002d0]	0x34011770  ori $1, $0, 6000                ; solver_benchmark_imp5.s:269: beq	$t1, 6000, execute_sweep_shoot
+        1 [0x800002d4]	0x10290029  beq $1, $9, 164 [execute_sweep_shoot-0x800002d4]
+        1 [0x800002d8]	0x3c010098  lui $1, 152                     ; solver_benchmark_imp5.s:270: blt	$t1, 10000000, execute_hostcheck
+        1 [0x800002dc]	0x34219680  ori $1, $1, -27008
+        1 [0x800002e0]	0x0121082a  slt $1, $9, $1
+        1 [0x800002e4]	0x1420003c  bne $1, $0, 240 [execute_hostcheck-0x800002e4]
+        1 [0x800002e8]	0x3c010131  lui $1, 305                     ; solver_benchmark_imp5.s:271: beq	$t1, 20000000, return_end
+        1 [0x800002ec]	0x34212d00  ori $1, $1, 11520
+        1 [0x800002f0]	0x1029006b  beq $1, $9, 428 [return_end-0x800002f0]
+        1 [0x800002f4]	0x3c0105f5  lui $1, 1525                    ; solver_benchmark_imp5.s:272: blt	$t1, 100000000, execute_jump
+        1 [0x800002f8]	0x3421e100  ori $1, $1, -7936
+        1 [0x800002fc]	0x0121082a  slt $1, $9, $1
+        1 [0x80000300]	0x14200052  bne $1, $0, 328 [execute_jump-0x80000300]
+        1 [0x80000304]	0x3c010beb  lui $1, 3051                    ; solver_benchmark_imp5.s:273: blt	$t1, 200000000, return_delay
+        1 [0x80000308]	0x3421c200  ori $1, $1, -15872
+        1 [0x8000030c]	0x0121082a  slt $1, $9, $1
+        1 [0x80000310]	0x14200052  bne $1, $0, 328 [return_delay-0x80000310]
+        0 [0x80000314]	0x08000121  j 0x00000484 [return_sweep_delay]; solver_benchmark_imp5.s:274: j	return_sweep_delay		# TODO: MOVE THIS UP!
+        0 [0x80000318]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:278: lw	$t9, is_blue_bot		# orientation matters
+        0 [0x8000031c]	0x8c390654  lw $25, 1620($1)
+        0 [0x80000320]	0x13200002  beq $25, $0, 8 [angle_write-0x80000320]; solver_benchmark_imp5.s:279: beq	$t9, $zero, angle_write		# don't add 180 if starting top-left (red bot)
+        0 [0x80000324]	0x212900b4  addi $9, $9, 180                ; solver_benchmark_imp5.s:281: add	$t1, $t1, 180			# fall-through to adding 180 for starting bottom-right (blue bot)
+        0 [0x80000328]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:286: sw	$t1, ANGLE
+        0 [0x8000032c]	0xac290014  sw $9, 20($1)
+        0 [0x80000330]	0x340a0001  ori $10, $0, 1                  ; solver_benchmark_imp5.s:287: li	$t2, 1
+        0 [0x80000334]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:288: sw	$t2, ANGLE_CONTROL		# 1 = "absolute" angle control and store confirms and sets angle
+        0 [0x80000338]	0xac2a0018  sw $10, 24($1)
+        0 [0x8000033c]	0x080000aa  j 0x000002a8 [execute_until_delay]; solver_benchmark_imp5.s:289: j	execute_until_delay
+        0 [0x80000340]	0x212afa24  addi $10, $9, -1500             ; solver_benchmark_imp5.s:293:  Variables correspon	
+        0 [0x80000344]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:294: sw	$t2, VELOCITY
+        0 [0x80000348]	0xac2a0010  sw $10, 16($1)
+        0 [0x8000034c]	0x080000aa  j 0x000002a8 [execute_until_delay]; solver_benchmark_imp5.s:295: j	execute_until_delay
+        0 [0x80000350]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:299: lw	$t9, fire_udp_rounds
+        0 [0x80000354]	0x8c39000c  lw $25, 12($1)
+        0 [0x80000358]	0x13200005  beq $25, $0, 20 [udp_done-0x80000358]; solver_benchmark_imp5.s:302: beq	$t9, $zero, udp_done
+        0 [0x8000035c]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:303: sw	$zero, SHOOT_UDP_PACKET
+        0 [0x80000360]	0xac2000e0  sw $0, 224($1)
+        0 [0x80000364]	0x2339ffff  addi $25, $25, -1               ; solver_benchmark_imp5.s:304: sub	$t9, $t9, 1
+        0 [0x80000368]	0x080000d6  j 0x00000358 [udp_fire]         ; solver_benchmark_imp5.s:305: j	udp_fire
+        0 [0x8000036c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:308: sw	$zero, fire_udp_rounds
+        0 [0x80000370]	0xac20000c  sw $0, 12($1)
+        0 [0x80000374]	0x080000aa  j 0x000002a8 [execute_until_delay]; solver_benchmark_imp5.s:310: j	execute_until_delay
+        0 [0x80000378]	0x3c018000  lui $1, -32768 [execute_until_delay]; solver_benchmark_imp5.s:314: la	$ra, execute_until_delay
+        0 [0x8000037c]	0x343f02a8  ori $31, $1, 680 [execute_until_delay]
+        0 [0x80000380]	0x340a0003  ori $10, $0, 3                  ; solver_benchmark_imp5.s:317: li 	$t2, SWEEP_SHOOT_ANGLE
+        0 [0x80000384]	0x340b0168  ori $11, $0, 360                ; solver_benchmark_imp5.s:318: li	$t3, 360
+        0 [0x80000388]	0x340c0001  ori $12, $0, 1                  ; solver_benchmark_imp5.s:319: li	$t4, 1				# t2 = angle jump, t3 = angle end, t4 = absolute angle control
+        0 [0x8000038c]	0x3c011001  lui $1, 4097 [scanner_wb]       ; solver_benchmark_imp5.s:320: la 	$t5, scanner_wb
+        0 [0x80000390]	0x342d0650  ori $13, $1, 1616 [scanner_wb]
+        0 [0x80000394]	0x340f0018  ori $15, $0, 24                 ; solver_benchmark_imp5.s:322: li 	$t7, 24				# enemy player
+        0 [0x80000398]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:325: sw	$t3, ANGLE
+        0 [0x8000039c]	0xac2b0014  sw $11, 20($1)
+        0 [0x800003a0]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:326: sw	$t4, ANGLE_CONTROL		# 1 = "absolute" angle control and store confirms and sets angle
+        0 [0x800003a4]	0xac2c0018  sw $12, 24($1)
+        0 [0x800003a8]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:329: sw 	$t5, USE_SCANNER
+        0 [0x800003ac]	0xac2d00e8  sw $13, 232($1)
+        0 [0x800003b0]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:331: lb 	$t6, tile_type
+        0 [0x800003b4]	0x802e0652  lb $14, 1618($1)
+        0 [0x800003b8]	0x15cf0004  bne $14, $15, 16 [finish_loop_sweep-0x800003b8]; solver_benchmark_imp5.s:332: bne 	$t6, $t7, finish_loop_sweep
+        0 [0x800003bc]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:334: sw	$zero, SHOOT_UDP_PACKET
+        0 [0x800003c0]	0xac2000e0  sw $0, 224($1)
+        0 [0x800003c4]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:337: j 	$ra
+        0 [0x800003c8]	0x016a5822  sub $11, $11, $10               ; solver_benchmark_imp5.s:340: sub 	$t3, $t3, $t2
+        0 [0x800003cc]	0x1d60fff3  bgtz $11 -52 [loop_sweep-0x800003cc]; solver_benchmark_imp5.s:341: bgtz	$t3, loop_sweep
+        0 [0x800003d0]	0x03e00008  jr $31                          ; solver_benchmark_imp5.s:342: j 	$ra
+        0 [0x800003d4]	0x3c011001  lui $1, 4097 [arena_map]        ; solver_benchmark_imp5.s:346: la	$t5, arena_map			# packets to fire at the host at given (x, y)
+        0 [0x800003d8]	0x342d0010  ori $13, $1, 16 [arena_map]
+        0 [0x800003dc]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:347: sw	$t5, ARENA_MAP
+        0 [0x800003e0]	0xac2d00dc  sw $13, 220($1)
+        0 [0x800003e4]	0x212af448  addi $10, $9, -3000             ; solver_benchmark_imp5.s:349: sub	$t2, $t1, 3000			# command offset
+        0 [0x800003e8]	0x000a5982  srl $11, $10, 6                 ; solver_benchmark_imp5.s:350: srl	$t3, $t2, 6			# x-tile (NOT pixel!)
+        0 [0x800003ec]	0x314c003f  andi $12, $10, 63               ; solver_benchmark_imp5.s:351: and	$t4, $t2, 0x3f			# y-tile (NOT pixel!)
+        0 [0x800003f0]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:353: lw	$t9, is_blue_bot		# orientation matters
+        0 [0x800003f4]	0x8c390654  lw $25, 1620($1)
+        0 [0x800003f8]	0x13200004  beq $25, $0, 16 [hostcheck_no_reflect-0x800003f8]; solver_benchmark_imp5.s:354: beq	$t9, $zero, hostcheck_no_reflect# don't change tile if red bot
+        0 [0x800003fc]	0x340d0027  ori $13, $0, 39                 ; solver_benchmark_imp5.s:356: li	$t5, MAX_XY_TILES
+        0 [0x80000400]	0x01ab5822  sub $11, $13, $11               ; solver_benchmark_imp5.s:357: sub	$t3, $t5, $t3			# fall-through to reflecting tile *about the origin*
+        0 [0x80000404]	0x01ac6022  sub $12, $13, $12               ; solver_benchmark_imp5.s:358: sub	$t4, $t5, $t4			# (i.e. x = 39 - x; y = 39 - y)
+        0 [0x80000408]	0x34010028  ori $1, $0, 40                  ; solver_benchmark_imp5.s:361: mul	$t4, $t4, 40			# map[y][x] == map[y * 40 + x]
+        0 [0x8000040c]	0x71816002  mul $12, $12, $1
+        0 [0x80000410]	0x016c5820  add $11, $11, $12               ; solver_benchmark_imp5.s:362: add	$t3, $t3, $t4			# index at $t3
+        0 [0x80000414]	0x34190000  ori $25, $0, 0                  ; solver_benchmark_imp5.s:364: li	$t9, 0				# number of shots to fire
+        0 [0x80000418]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:366: lb	$t6, arena_map($t3)		# load tile type
+        0 [0x8000041c]	0x002b0821  addu $1, $1, $11
+        0 [0x80000420]	0x802e0010  lb $14, 16($1)
+        0 [0x80000424]	0x31cf0004  andi $15, $14, 4                ; solver_benchmark_imp5.s:368: and	$t7, $t6, 4			# check friendly host
+        0 [0x80000428]	0x15e00005  bne $15, $0, 20 [hostcheck_add_0-0x80000428]; solver_benchmark_imp5.s:369: bne	$t7, $zero, hostcheck_add_0	# branch if friendly host
+        0 [0x8000042c]	0x31d80008  andi $24, $14, 8                ; solver_benchmark_imp5.s:371: and	$t8, $t6, 8			# check enemy host
+        0 [0x80000430]	0x13000002  beq $24, $0, 8 [hostcheck_add_1-0x80000430]; solver_benchmark_imp5.s:372: beq	$t8, $zero, hostcheck_add_1	# branch if neutral host
+        0 [0x80000434]	0x23390001  addi $25, $25, 1                ; solver_benchmark_imp5.s:376: add	$t9, $t9, 1			# 2 total shots if enemy
+        0 [0x80000438]	0x23390001  addi $25, $25, 1                ; solver_benchmark_imp5.s:379: add	$t9, $t9, 1			# 1 total shot if neutral
+        0 [0x8000043c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:382: sw	$t9, fire_udp_rounds		# 0 shots if friendly
+        0 [0x80000440]	0xac39000c  sw $25, 12($1)
+        0 [0x80000444]	0x080000aa  j 0x000002a8 [execute_until_delay]; solver_benchmark_imp5.s:383: j	execute_until_delay
+        0 [0x80000448]	0x3c01ff67  lui $1, -153                    ; solver_benchmark_imp5.s:387: sub	$t0, $t1, 10000000		# subtract "opcode"
+        0 [0x8000044c]	0x34216980  ori $1, $1, 27008
+        0 [0x80000450]	0x01214020  add $8, $9, $1
+        0 [0x80000454]	0x080000aa  j 0x000002a8 [execute_until_delay]; solver_benchmark_imp5.s:388: j	execute_until_delay
+        1 [0x80000458]	0x3c01fa0a  lui $1, -1526                   ; solver_benchmark_imp5.s:392: sub	$t1, $t1, 100000000		# subtract "opcode"
+        1 [0x8000045c]	0x34211f00  ori $1, $1, 7936
+        1 [0x80000460]	0x01214820  add $9, $9, $1
+        1 [0x80000464]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:393: lw	$t2, TIMER
+        1 [0x80000468]	0x8c2a001c  lw $10, 28($1)
+        1 [0x8000046c]	0x01495020  add $10, $10, $9                ; solver_benchmark_imp5.s:394: add	$t2, $t2, $t1			# add delay (in cycles) to current cycle count
+        1 [0x80000470]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:395: sw	$t2, TIMER			# request interrupt
+        1 [0x80000474]	0xac2a001c  sw $10, 28($1)
+        1 [0x80000478]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:397: sw	$t0, current_move
+        1 [0x8000047c]	0xac280000  sw $8, 0($1)
+        1 [0x80000480]	0x08000078  j 0x000001e0 [interrupt_dispatch]; solver_benchmark_imp5.s:398: j	interrupt_dispatch		# see if other interrupts are waiting
+        0 [0x80000484]	0x3c01f414  lui $1, -3052                   ; solver_benchmark_imp5.s:402: sub	$t9, $t1, 200000000		# subtract "opcode"
+        0 [0x80000488]	0x34213e00  ori $1, $1, 15872
+        0 [0x8000048c]	0x0121c820  add $25, $9, $1
+        0 [0x80000490]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:404: sw	$t0, current_move		# store current move for instruction following entire sweep delay
+        0 [0x80000494]	0xac280000  sw $8, 0($1)
+        0 [0x80000498]	0x08000089  j 0x00000224 [check_sweep_delay]; solver_benchmark_imp5.s:405: j	check_sweep_delay		# start
+        0 [0x8000049c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:409: sw	$t0, current_move
+        0 [0x800004a0]	0xac280000  sw $8, 0($1)
+        0 [0x800004a4]	0x08000078  j 0x000001e0 [interrupt_dispatch]; solver_benchmark_imp5.s:410: j	interrupt_dispatch		# see if other interrupts are waiting
+     1609 [0x800004a8]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:413: sw	$zero, REQUEST_PUZZLE_ACK
+     1609 [0x800004ac]	0xac2000d8  sw $0, 216($1)
+     1609 [0x800004b0]	0x3c011001  lui $1, 4097 [has_puzzle]       ; solver_benchmark_imp5.s:416: la	$t0, has_puzzle
+     1609 [0x800004b4]	0x34280008  ori $8, $1, 8 [has_puzzle]
+     1609 [0x800004b8]	0x34090001  ori $9, $0, 1                   ; solver_benchmark_imp5.s:417: li	$t1, 1
+     1609 [0x800004bc]	0xad090000  sw $9, 0($8)                    ; solver_benchmark_imp5.s:418: sw	$t1, ($t0)
+     1609 [0x800004c0]	0x08000078  j 0x000001e0 [interrupt_dispatch]; solver_benchmark_imp5.s:420: j	interrupt_dispatch
+        0 [0x800004c4]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:425: sw	$zero, TIMER_ACK
+        0 [0x800004c8]	0xac20006c  sw $0, 108($1)
+        0 [0x800004cc]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:428: sw	$zero, RESPAWN_ACK
+        0 [0x800004d0]	0xac2000f0  sw $0, 240($1)
+        0 [0x800004d4]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:430: lw	$t8, BOT_X			# get current location
+        0 [0x800004d8]	0x8c380020  lw $24, 32($1)
+        0 [0x800004dc]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:431: lw	$t9, BOT_Y			# more details on host mapping in scripts/host_mapping.md
+        0 [0x800004e0]	0x8c390024  lw $25, 36($1)
+        0 [0x800004e4]	0x0018c0c2  srl $24, $24, 3                 ; solver_benchmark_imp5.s:433: srl	$t8, $t8, 3			# convert pixels to tiles (divide by 8)
+        0 [0x800004e8]	0x0019c8c2  srl $25, $25, 3                 ; solver_benchmark_imp5.s:434: srl	$t9, $t9, 3
+        0 [0x800004ec]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:436: lw	$t0, is_blue_bot		# orientation matters
+        0 [0x800004f0]	0x8c280654  lw $8, 1620($1)
+        0 [0x800004f4]	0x11000004  beq $8, $0, 16 [respawn_no_reflect-0x800004f4]; solver_benchmark_imp5.s:437: beq	$t0, $zero, respawn_no_reflect	# don't change tile if red bot
+        0 [0x800004f8]	0x34090027  ori $9, $0, 39                  ; solver_benchmark_imp5.s:439: li	$t1, MAX_XY_TILES
+        0 [0x800004fc]	0x0138c022  sub $24, $9, $24                ; solver_benchmark_imp5.s:440: sub	$t8, $t1, $t8			# fall-through to reflecting tile *about the origin*
+        0 [0x80000500]	0x0139c822  sub $25, $9, $25                ; solver_benchmark_imp5.s:441: sub	$t9, $t1, $t9			# (i.e. x = 39 - x; y = 39 - y)
+        0 [0x80000504]	0x34080000  ori $8, $0, 0                   ; solver_benchmark_imp5.s:445: li	$t0, 0				# bitstring for pointer array index. Bits "3210", 0 is LSB
+        0 [0x80000508]	0x340e0008  ori $14, $0, 8                  ; solver_benchmark_imp5.s:447: li	$t6, 8				# what x will be compared to for bit 3
+        0 [0x8000050c]	0x340f0008  ori $15, $0, 8                  ; solver_benchmark_imp5.s:448: li	$t7, 8				# what y will be compared to for bit 2
+        0 [0x80000510]	0x2b010010  slti $1, $24, 16                ; solver_benchmark_imp5.s:451: blt	$t8, 16, respawn_bit_2_y
+        0 [0x80000514]	0x14200003  bne $1, $0, 12 [respawn_bit_2_y-0x80000514]
+        0 [0x80000518]	0x35080008  ori $8, $8, 8                   ; solver_benchmark_imp5.s:452: or	$t0, $t0, 8			# set bit 3
+        0 [0x8000051c]	0x340e0020  ori $14, $0, 32                 ; solver_benchmark_imp5.s:453: li	$t6, 32
+        0 [0x80000520]	0x2b210010  slti $1, $25, 16                ; solver_benchmark_imp5.s:456: blt	$t9, 16, respawn_bit_1_0
+        0 [0x80000524]	0x14200003  bne $1, $0, 12 [respawn_bit_1_0-0x80000524]
+        0 [0x80000528]	0x35080004  ori $8, $8, 4                   ; solver_benchmark_imp5.s:457: or	$t0, $t0, 4			# set bit 2
+        0 [0x8000052c]	0x340f0020  ori $15, $0, 32                 ; solver_benchmark_imp5.s:458: li	$t7, 32
+        0 [0x80000530]	0x15d80003  bne $14, $24, 12                ; solver_benchmark_imp5.s:461: sge	$t1, $t8, $t6			# $t1 is 0 if x < [8/32], else 1
+        0 [0x80000534]	0x34090001  ori $9, $0, 1
+        0 [0x80000538]	0x10000002  beq $0, $0, 8
+        0 [0x8000053c]	0x01d8482a  slt $9, $14, $24
+        0 [0x80000540]	0x15f90003  bne $15, $25, 12                ; solver_benchmark_imp5.s:462: sge	$t2, $t9, $t7			# $t2 is 0 if y < [8/32], else 1
+        0 [0x80000544]	0x340a0001  ori $10, $0, 1
+        0 [0x80000548]	0x10000002  beq $0, $0, 8
+        0 [0x8000054c]	0x01f9502a  slt $10, $15, $25
+        0 [0x80000550]	0x00094840  sll $9, $9, 1                   ; solver_benchmark_imp5.s:464: sll	$t1, $t1, 1			# make $t1 into bit 1
+        0 [0x80000554]	0x01094025  or $8, $8, $9                   ; solver_benchmark_imp5.s:466: or	$t0, $t0, $t1			# set bit 1
+        0 [0x80000558]	0x010a4025  or $8, $8, $10                  ; solver_benchmark_imp5.s:467: or	$t0, $t0, $t2			# set bit 0
+        0 [0x8000055c]	0x00084080  sll $8, $8, 2                   ; solver_benchmark_imp5.s:470: sll	$t0, $t0, 2			# multiply by 4
+        0 [0x80000560]	0x3c011001  lui $1, 4097 [respawn_pointers] ; solver_benchmark_imp5.s:472: lw	$t5, respawn_pointers($t0)	# load in instruction to start at
+        0 [0x80000564]	0x00280821  addu $1, $1, $8
+        0 [0x80000568]	0x8c2d086c  lw $13, 2156($1) [respawn_pointers]
+        0 [0x8000056c]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:474: sw	$zero, remaining_sweep_delay_cycles	# reset remaining_sweep_delay_cycles so sweep_delay loop doesn't take over
+        0 [0x80000570]	0xac200004  sw $0, 4($1)
+        0 [0x80000574]	0x3c011001  lui $1, 4097                    ; solver_benchmark_imp5.s:475: sw	$t5, current_move		# set instruction counter
+        0 [0x80000578]	0xac2d0000  sw $13, 0($1)
+        0 [0x8000057c]	0x3c01ffff  lui $1, -1                      ; solver_benchmark_imp5.s:476: sw	$zero, TIMER			# request timer interrupt immediately so timer loop takes over
+        0 [0x80000580]	0xac20001c  sw $0, 28($1)
+        0 [0x80000584]	0x08000078  j 0x000001e0 [interrupt_dispatch]; solver_benchmark_imp5.s:478: j	interrupt_dispatch
+        0 [0x80000588]	0x34020004  ori $2, $0, 4                   ; solver_benchmark_imp5.s:481: li	$v0, PRINT_STRING
+        0 [0x8000058c]	0x3c019000  lui $1, -28672 [non_intrpt_str] ; solver_benchmark_imp5.s:482: la	$a0, non_intrpt_str
+        0 [0x80000590]	0x34240258  ori $4, $1, 600 [non_intrpt_str]
+        0 [0x80000594]	0x0000000c  syscall                         ; solver_benchmark_imp5.s:483: syscall					# print out an error message
+     1610 [0x80000598]	0x3c019000  lui $1, -28672 [chunkIH]        ; solver_benchmark_imp5.s:486: la	$k0, chunkIH
+     1610 [0x8000059c]	0x343a0208  ori $26, $1, 520 [chunkIH]
+     1610 [0x800005a0]	0x8f480034  lw $8, 52($26)                  ; solver_benchmark_imp5.s:491: lw	$t0, 52($k0)
+     1610 [0x800005a4]	0x01000011  mthi $8                         ; solver_benchmark_imp5.s:492: mthi	$t0
+     1610 [0x800005a8]	0x8f480038  lw $8, 56($26)                  ; solver_benchmark_imp5.s:493: lw	$t0, 56($k0)
+     1610 [0x800005ac]	0x01000013  mtlo $8                         ; solver_benchmark_imp5.s:494: mtlo	$t0
+     1610 [0x800005b0]	0x8f440000  lw $4, 0($26)                   ; solver_benchmark_imp5.s:496: lw	$a0, 0($k0)			# Restore saved registers
+     1610 [0x800005b4]	0x8f420004  lw $2, 4($26)                   ; solver_benchmark_imp5.s:497: lw	$v0, 4($k0)
+     1610 [0x800005b8]	0x8f480008  lw $8, 8($26)                   ; solver_benchmark_imp5.s:498: lw	$t0, 8($k0)
+     1610 [0x800005bc]	0x8f49000c  lw $9, 12($26)                  ; solver_benchmark_imp5.s:499: lw	$t1, 12($k0)
+     1610 [0x800005c0]	0x8f4a0010  lw $10, 16($26)                 ; solver_benchmark_imp5.s:500: lw	$t2, 16($k0)
+     1610 [0x800005c4]	0x8f4b0014  lw $11, 20($26)                 ; solver_benchmark_imp5.s:501: lw	$t3, 20($k0)
+     1610 [0x800005c8]	0x8f4c0018  lw $12, 24($26)                 ; solver_benchmark_imp5.s:502: lw	$t4, 24($k0)
+     1610 [0x800005cc]	0x8f4d001c  lw $13, 28($26)                 ; solver_benchmark_imp5.s:503: lw	$t5, 28($k0)
+     1610 [0x800005d0]	0x8f4e0020  lw $14, 32($26)                 ; solver_benchmark_imp5.s:504: lw	$t6, 32($k0)
+     1610 [0x800005d4]	0x8f4f0024  lw $15, 36($26)                 ; solver_benchmark_imp5.s:505: lw	$t7, 36($k0)
+     1610 [0x800005d8]	0x8f580028  lw $24, 40($26)                 ; solver_benchmark_imp5.s:506: lw	$t8, 40($k0)
+     1610 [0x800005dc]	0x8f59002c  lw $25, 44($26)                 ; solver_benchmark_imp5.s:507: lw	$t9, 44($k0)
+     1610 [0x800005e0]	0x8f5f0030  lw $31, 48($26)                 ; solver_benchmark_imp5.s:508: lw	$ra, 48($k0)
+     1610 [0x800005e4]	0x001b0821  addu $1, $0, $27                ; solver_benchmark_imp5.s:511: move	$at, $k1			# Restore $at
+     1610 [0x800005e8]	0x42000018  eret                            ; solver_benchmark_imp5.s:513: eret
