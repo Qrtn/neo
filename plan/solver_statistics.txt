@@ -5,3 +5,4 @@ Name            Bytecoins generated
 Default         5400
 Improved 1      71400
 Improved 2      75600
+Improved 3	77550

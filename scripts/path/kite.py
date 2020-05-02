@@ -4,7 +4,7 @@ from pprint import pprint
 
 from path_generator import *
 
-CLOCKWISE = True
+CLOCKWISE = False
 
 goto_points = [
     (66, 66),

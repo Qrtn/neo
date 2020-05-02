@@ -95,11 +95,21 @@ main:
 
 	sw	$zero, TIMER				# Kick off kernel instruction loop immediately
 
+main_solve_setup:					# Breaks all calling conventions in the interest of saving cycles
+	la	$a3, puzzle_board			# in the hot loop. These registers will be used in toggle lights
+
+main_request_puzzle_setup:
 	# Puzzle solving
 	la	$s0, puzzle				# Puzzle address
+	la	$s1, has_puzzle
+	la	$s2, solution				
+
+	la	$s3, REQUEST_PUZZLE
+	la	$s4, SUBMIT_SOLUTION
+	la	$s5, MAX_SOLUTION_SIZE
 
 main_request_puzzle:
-	sw	$s0, REQUEST_PUZZLE			# Request puzzle
+	sw	$s0, ($s3)				# Request puzzle
 
 main_reset_solution:
 	li	$t0, 0					# i = 0
@@ -110,12 +120,12 @@ main_reset_solution_for:
 	add	$t0, $t0, 1				# ++i
 
 	# Minimal possible size (not 256) to avoid spending too much time clearing solution
-	bne	$t0, MAX_SOLUTION_SIZE, main_reset_solution_for
+	bne	$t0, $s5, main_reset_solution_for
 
 main_reset_solution_for_done:
 
 main_check_puzzle_available:
-	lw	$t0, has_puzzle				# Kernel writes to has_puzzle when puzzle is available
+	lw	$t0, ($s1)				# Kernel writes to has_puzzle when puzzle is available
 	beq	$t0, $zero, main_check_puzzle_available	# has_puzzle used to communicate between kernel and user
 
 #	li	$t9, SOLVE_SLOWDOWN_CYCLES		# ! For artifically throttling the solver's speed
@@ -125,10 +135,9 @@ main_check_puzzle_available:
 
 	jal	solve					# Call solver
 
-	la	$t0, solution				# Submit solution
-	sw	$t0, SUBMIT_SOLUTION
+	sw	$s2, ($s4)				# Submit solution
 
-	sw	$zero, has_puzzle			# Reset has_puzzle
+	sw	$zero, ($s1)				# Reset has_puzzle
 
 	j	main_request_puzzle			# User-space code requests and solves puzzles forever
 							# (Kernel code does the movement)
@@ -462,6 +471,7 @@ respawn_bit_1_0:
 
 	lw	$t5, respawn_pointers($t0)	# load in instruction to start at
 
+	sw	$zero, remaining_sweep_delay_cycles	# reset remaining_sweep_delay_cycles so sweep_delay loop doesn't take over
 	sw	$t5, current_move		# set instruction counter
 	sw	$zero, TIMER			# request timer interrupt immediately so timer loop takes over
 
@@ -529,6 +539,10 @@ solve:
 	sw	$s1, 8($sp)
 	sw	$s2, 12($sp)
 	sw	$s3, 16($sp)
+
+	lw	$s6, num_rows			# Breaks calling conventions
+	lw	$s7, num_cols			# Loads necessary puzzle-wide information for toggle_lights instead of
+	lw	$s8, num_colors			# passing in arguments so we can save cycles in the hot loop
 
 	jal	chase_lights
 
@@ -697,19 +711,19 @@ toggle_light:
     ##
 	## End aliases
 
-	lw	$t0, num_rows
-	lw	$t1, num_cols
-	lw	$t2, num_colors
-	la	$t3, puzzle_board
+	#lw	$t0, num_rows			# now $s6
+	#lw	$t1, num_cols			# now $s7
+	#lw	$t2, num_colors			# now $s8
+	#la	$t3, puzzle_board		# now $a3
 
-	# assign  $t5 = $t3&[$a0 * $t1 + $a1]
-	mul	$t5, $a0, $t1
+	# assign  $t5 = $a3&[$a0 * $s7 + $a1]
+	mul	$t5, $a0, $s7
 	add	$t5, $t5, $a1
-	add	$t5, $t5, $t3
-	# assign  $t6 = (*::($t5) + $a2) % $t2
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
 	lbu	$t6, 0($t5)
 	add	$t6, $t6, $a2
-	div	$t6, $t2
+	div	$t6, $s8
 	mfhi	$t6
 	# assign  $t6 =>:: $t5
 	sb	$t6, 0($t5)
@@ -717,15 +731,15 @@ toggle_light:
 toggle_light_row_greater_if:
 	blez	$a0, toggle_light_col_greater_if
 
-	# assign  $t5 = $t3&[($a0 - 1) * $t1 + $a1]
+	# assign  $t5 = $a3&[($a0 - 1) * $s7 + $a1]
 	addi	$t5, $a0, -1
-	mul	$t5, $t5, $t1
+	mul	$t5, $t5, $s7
 	add	$t5, $t5, $a1
-	add	$t5, $t5, $t3
-	# assign  $t6 = (*::($t5) + $a2) % $t2
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
 	lbu	$t6, 0($t5)
 	add	$t6, $t6, $a2
-	div	$t6, $t2
+	div	$t6, $s8
 	mfhi	$t6
 	# assign  $t6 =>:: $t5
 	sb	$t6, 0($t5)
@@ -733,51 +747,51 @@ toggle_light_row_greater_if:
 toggle_light_col_greater_if:
 	blez	$a1, toggle_light_row_less_if
 
-	# assign  $t5 = $t3&[($a0) * $t1 + $a1 - 1]
-	mul	$t9, $a0, $t1
+	# assign  $t5 = $a3&[($a0) * $s7 + $a1 - 1]
+	mul	$t9, $a0, $s7
 	add	$t9, $t9, $a1
 	addi	$t5, $t9, -1
-	add	$t5, $t5, $t3
-	# assign  $t6 = (*::($t5) + $a2) % $t2
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
 	lbu	$t6, 0($t5)
 	add	$t6, $t6, $a2
-	div	$t6, $t2
+	div	$t6, $s8
 	mfhi	$t6
 	# assign  $t6 =>:: $t5
 	sb	$t6, 0($t5)
 
 toggle_light_row_less_if:
-	# assign  $t4 = $t0 - 1
-	addi	$t4, $t0, -1
+	# assign  $t4 = $s6 - 1
+	addi	$t4, $s6, -1
 	bge	$a0, $t4, toggle_light_col_less_if
 
-	# assign  $t5 = $t3&[($a0 + 1) * $t1 + $a1]
+	# assign  $t5 = $a3&[($a0 + 1) * $s7 + $a1]
 	addi	$t5, $a0, 1
-	mul	$t5, $t5, $t1
+	mul	$t5, $t5, $s7
 	add	$t5, $t5, $a1
-	add	$t5, $t5, $t3
-	# assign  $t6 = (*::($t5) + $a2) % $t2
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
 	lbu	$t6, 0($t5)
 	add	$t6, $t6, $a2
-	div	$t6, $t2
+	div	$t6, $s8
 	mfhi	$t6
 	# assign  $t6 =>:: $t5
 	sb	$t6, 0($t5)
 
 toggle_light_col_less_if:
-	# assign  $t4 = $t1 - 1
-	addi	$t4, $t1, -1
+	# assign  $t4 = $s7 - 1
+	addi	$t4, $s7, -1
 	bge	$a1, $t4, toggle_light_end
 
-	# assign  $t5 = $t3&[($a0) * $t1 + $a1 + 1]
-	mul	$t5, $a0, $t1
+	# assign  $t5 = $a3&[($a0) * $s7 + $a1 + 1]
+	mul	$t5, $a0, $s7
 	add	$t5, $t5, $a1
 	addi	$t5, $t5, 1
-	add	$t5, $t5, $t3
-	# assign  $t6 = (*::($t5) + $a2) % $t2
+	add	$t5, $t5, $a3
+	# assign  $t6 = (*::($t5) + $a2) % $s8
 	lbu	$t6, 0($t5)
 	add	$t6, $t6, $a2
-	div	$t6, $t2
+	div	$t6, $s8
 	mfhi	$t6
 	# assign  $t6 =>:: $t5
 	sb	$t6, 0($t5)
