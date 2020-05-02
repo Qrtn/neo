@@ -1,0 +1,7 @@
+Puzzle seed: 42
+
+Name            Bytecoins generated
+===================================
+Default         5400
+Improved 1      71400
+Improved 2      75600
