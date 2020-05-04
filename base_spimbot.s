@@ -261,9 +261,9 @@ timer_interrupt:
 check_sweep_delay:
 	ble	$t9, SWEEP_SHOOT_CYCLES, finish_sweep_delay_cycles
 
-	lw	$t1, ANGLE			# store current angle
 	lw	$t8, VELOCITY			# store current velocity
 	sw	$zero, VELOCITY			# stop moving
+	lw	$t1, ANGLE			# store current angle
 
 	jal	execute_sweep_shoot_during_delay	# we don't follow calling conventions here ;) execute_sweep_shoot... uses $t2 through $t7
 
@@ -282,16 +282,18 @@ store_delay:
 
 	sw	$t4, TIMER			# request timer interrupt
 
-	sw	$t8, VELOCITY			# restore previous velocity
 	sw	$t1, ANGLE			# restore previous angle
 	li	$t1, 1
 	sw	$t1, ANGLE_CONTROL		# restore previous angle ("absolute")
+	sw	$t8, VELOCITY			# restore previous velocity
 
 	j	interrupt_dispatch		# return control
 
 finish_sweep_delay_cycles:
 	sub	$t9, $t9, 2			# finish out the remaining sweep delay cycles doing nothing while we are moving
 	bgtz	$t9, finish_sweep_delay_cycles
+
+	sw	$zero, VELOCITY			# ?? explicitly stop even though IML opcode 1500 takes care of this
 
 execute_normal_instruction:
 	lw	$t0, current_move		# load instruction counter
