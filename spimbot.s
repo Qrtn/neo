@@ -1,1 +1,1 @@
-build/mips/kfx_cw.s
+plan/results/old_experimental/spimbot_experimental.s
