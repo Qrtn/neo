@@ -1,1 +1,1 @@
-build/mips/kite_sweep_delay_ccw.s
+build/mips/kfx_ccw.s
