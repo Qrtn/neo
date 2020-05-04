@@ -35,14 +35,15 @@
 While finalizing Neo's movement plan, one final abstraction on top of AML came into place: *Path Schema*, a high-level sequence of the positions Neo will be in and the targets it will shoot during one orbit around the map. Path Schema was primarily useful because it automatically generated the AML that executes when Neo needs to restart its path at a particular host. In addition, Path Schema had useful utilities that could reflect and manipulate sequences of locations. Since the map is symmetric across two axes, and Neo's ultimate movement path had point symmetry, this proved useful in saving time and eliminating human error.
 
 ## Development
-  One of the recurring issues that we faced was the inability of our bot to make precise movements around the map. As our strategy follows a fixed path, it's incredibly important that Neo deviates very little from this path so that it can navigate around obstacles on the map. The fundamental limitation of our compiled system is that calculations for moving distances are made ahead of time. This means that Neo does not react to its actual position on the map when moving. Instead, it follows a precalculated set of angle, velocity, and delay instructions whose inherent discrepancies with the actual movement of the bot can add up and cause Neo to run into obstacles. 
 
-  We were able to reduce the inaccuracies in our precalculated path by ensuring that our geometric calculations stayed true to the actual movements that the bot made. In particular, SPIMbots are only able to move in angles of integer degrees. So instead of working off the assumption that the bot moved to a theoretical ending position, we determined the actual ending position of the bot by using the real integer angle at which it moved. Additionally, we asked questions about the internal representation of the SPIMbot's position, and used those details to further fine-tune our geometric calculations. 
+One of the recurring issues that we faced was the inability of our bot to make precise movements around the map. As our strategy follows a fixed path, it's incredibly important that Neo deviates very little from this path so that it can navigate around obstacles on the map. The fundamental limitation of our compiled system is that calculations for moving distances are made ahead of time. This means that Neo does not react to its actual position on the map when moving. Instead, it follows a precalculated set of angle, velocity, and delay instructions. This has the advantage of not requiring the assembly code to handle geometric calculations. However, inherent discrepancies between the precalculated path and the actual movement of the bot can add up and cause Neo to run into obstacles, completely destroying its path.
+
+We were able to reduce the inaccuracies in our precalculated path by ensuring that our geometric calculations stayed true to the actual movements that the bot made. In particular, SPIMbots are only able to move in angles of integer degrees. So instead of working off the assumption that the bot moved to a theoretical ending position, we determined the actual ending position of the bot by using the real integer angle at which it moved. Additionally, we asked questions about the internal representation of the SPIMbot's position and used those details to further fine-tune our AML compiler. 
   
 ## Contributors
 
-**Yousef Ahmed:** Developed opponent-shooting strategy. 
+**Yousef Ahmed:** Developed opponent-shooting strategy.
 
 **Gene Wang:** Detailed post-match analysis.
 
-**Jeffrey Tang:** Developed path schema, AML, and IML framework. Optimized puzzle solver.
+**Jeffrey Tang:** Developed Path Schema, AML, and IML framework. Optimized puzzle solver.
