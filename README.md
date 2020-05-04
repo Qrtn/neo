@@ -4,8 +4,8 @@
 >
 > *"No, Neo. I'm trying to tell you that when you're ready, you won't have to."*
 
-![Neo](http://jeffreytang.org/images/neo_logo.png)
-![Neo Gameplay](http://jeffreytang.org/images/neo_red_gameplay.gif)
+![Neo](plan/images/neo_logo.png?raw=true)
+![Neo Gameplay](plan/images/neo_red_gameplay.gif?raw=true "Neo (red) Gameplay")
 
 ### *A new era of SPIMbot*
 
