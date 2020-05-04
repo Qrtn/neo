@@ -8,3 +8,4 @@ Improved 2      75600
 Improved 3	77550
 Improved 4	78700
 Improved 5	80400
+Improved 6	127750
